@@ -23,6 +23,10 @@
         .touch-active:active { transform: scale(0.98); }
         .image-overlay { background: linear-gradient(to top, rgba(15, 23, 42, 0.9) 0%, rgba(15, 23, 42, 0.2) 50%, transparent 100%); }
         .receipt-border { border: 2px dashed #E2E8F0; }
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white; }
+        }
     </style>
 </head>
 <body class="bg-[#F8FAFC] text-[#0F172A] antialiased">
@@ -54,6 +58,87 @@
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                     onError={() => setError(true)}
                 />
+            );
+        };
+
+        // --- Receipt Component ---
+        const DigitalReceipt = ({ data, onBack }) => {
+            return (
+                <div className="space-y-12 animate-fade-in max-w-2xl mx-auto py-8">
+                    <div className="bg-white p-8 md:p-12 rounded-[2rem] shadow-2xl border-t-8 border-blue-600 text-left relative overflow-hidden">
+                        <div className="absolute top-0 right-0 p-8 opacity-10"><Icon name="layers" size={120} /></div>
+                        
+                        <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12 border-b pb-8">
+                            <div>
+                                <h3 className="text-3xl font-serif italic text-blue-900">Proof of Acquisition</h3>
+                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Deterministic Digital Receipt</p>
+                            </div>
+                            <div className="text-left md:text-right">
+                                <p className="text-[10px] font-bold text-slate-500 uppercase">Order Ref</p>
+                                <p className="font-mono text-xs text-blue-600">{data.id}</p>
+                            </div>
+                        </header>
+
+                        <div className="grid md:grid-cols-2 gap-12 mb-12">
+                            <div className="space-y-6">
+                                <div>
+                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Entity for Delivery</p>
+                                    <p className="text-sm font-medium">{data.email}</p>
+                                </div>
+                                {data.wallet && data.wallet !== 'n/a' && (
+                                    <div>
+                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Polygon Destination</p>
+                                        <p className="text-xs font-mono break-all text-blue-900 bg-blue-50 p-2 rounded">{data.wallet}</p>
+                                    </div>
+                                )}
+                            </div>
+                            <div className="space-y-6">
+                                <div>
+                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Acquisition Date</p>
+                                    <p className="text-sm font-medium">{data.date}</p>
+                                </div>
+                                <div>
+                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Status</p>
+                                    <span className="inline-flex items-center gap-2 text-green-600 text-[10px] font-bold uppercase border border-green-200 bg-green-50 px-3 py-1 rounded-full">✓ Fulfilled & Dispatched</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="receipt-border p-6 rounded-2xl space-y-4 mb-8">
+                            <div className="flex justify-between items-center text-sm">
+                                <span className="text-slate-500 font-medium">{data.item} (x{data.qty})</span>
+                                <span className="font-mono font-bold">€{data.amount.toFixed(2)}</span>
+                            </div>
+                            <div className="flex justify-between items-center text-xs">
+                                <span className="text-slate-400 italic">Polygon L2 Network Gas Fee</span>
+                                <span className="text-green-600 font-bold uppercase text-[9px]">Sponsored by Protocol</span>
+                            </div>
+                            <div className="pt-4 border-t-2 border-slate-100 flex justify-between items-baseline">
+                                <span className="text-lg font-serif italic text-slate-900">Total Settlement</span>
+                                <span className="text-4xl font-light text-blue-600 tracking-tighter">€{data.amount.toFixed(2)}</span>
+                            </div>
+                        </div>
+
+                        <footer className="text-center opacity-30">
+                            <p className="text-[9px] font-mono uppercase tracking-[0.5em]">LuxeDigital Institutional Ledger - 2026</p>
+                        </footer>
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row justify-center gap-4 no-print">
+                        <button 
+                            onClick={() => window.print()}
+                            className="px-8 py-4 border-2 border-slate-200 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-slate-50 transition-all flex items-center justify-center gap-2"
+                        >
+                            <Icon name="printer" size={14} /> Download Bill
+                        </button>
+                        <button 
+                            onClick={onBack} 
+                            className="bg-[#0F172A] hover:bg-blue-600 text-white px-10 py-4 rounded-xl font-bold uppercase text-[10px] tracking-[0.2em] transition-all touch-active"
+                        >
+                            Back to Ecosystem
+                        </button>
+                    </div>
+                </div>
             );
         };
 
@@ -96,6 +181,20 @@
                 history: "History",
                 back: "Back",
                 noHistory: "No acquisitions found in current session."
+            },
+            FR: {
+                hero: "Actifs Numériques Institutionnels.",
+                subHero: "Acquisition sécurisée de jetons Genesis ERC20 et littérature numérique. Conçu sur Polygon pour l'économie européenne haut de gamme.",
+                tokenTitle: "Jeton Utilitaire Genesis",
+                buyNow: "Autoriser et Acheter",
+                email: "Email de Livraison",
+                wallet: "Destination Polygon",
+                terms: "Je reconnais que les transferts sur le réseau Polygon sont irréversibles et non remboursables.",
+                status: ["Création du Paiement...", "Vérification", "Livraison en cours", "Actif Livré"],
+                connect: "Connecter",
+                history: "Historique",
+                back: "Retour",
+                noHistory: "Aucune acquisition trouvée dans la session actuelle."
             }
         };
 
@@ -109,6 +208,7 @@
             // Purchase History State
             const [purchaseHistory, setPurchaseHistory] = useState([]);
             const [currentTransactionId, setCurrentTransactionId] = useState('');
+            const [historyItemDetail, setHistoryItemDetail] = useState(null);
             
             // Wallet States
             const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
@@ -122,7 +222,7 @@
             const [manualWallet, setManualWallet] = useState('');
             const [accepted, setAccepted] = useState(false);
 
-            useEffect(() => { lucide.createIcons(); }, [view, step, isWalletModalOpen, isConnecting, searchQuery]);
+            useEffect(() => { lucide.createIcons(); }, [view, step, isWalletModalOpen, isConnecting, searchQuery, historyItemDetail]);
 
             const t = TRANSLATIONS[lang];
             const activeWallet = isConnected ? "0x71C7...976F" : manualWallet;
@@ -160,7 +260,6 @@
                     setStep(s => {
                         if (s >= 3) { 
                             clearInterval(interval); 
-                            // Add to history once delivered
                             const newRecord = {
                                 id: txId,
                                 date: new Date().toLocaleString(),
@@ -168,7 +267,7 @@
                                 type: selected === 'token' ? 'ERC20' : 'Ebook',
                                 qty: selected === 'token' ? qty : 1,
                                 amount: total,
-                                wallet: selected === 'token' ? (isConnected ? '0x71C7...976F' : manualWallet) : 'n/a',
+                                wallet: selected === 'token' ? (isConnected ? '0x71C7...976F' : (manualWallet || '0x...')) : 'n/a',
                                 email: email
                             };
                             setPurchaseHistory(prev => [newRecord, ...prev]);
@@ -182,9 +281,9 @@
             return (
                 <div className="min-h-screen selection:bg-blue-100 overflow-x-hidden">
                     {/* NAV */}
-                    <nav className="fixed top-0 w-full z-50 bg-[#0F172A] text-white px-4 md:px-6 py-4 shadow-2xl border-b border-blue-900/30">
+                    <nav className="fixed top-0 w-full z-50 bg-[#0F172A] text-white px-4 md:px-6 py-4 shadow-2xl border-b border-blue-900/30 no-print">
                         <div className="max-w-7xl mx-auto flex justify-between items-center">
-                            <div className="flex items-center gap-2 cursor-pointer group" onClick={() => { setView('home'); setStep(0); setSearchQuery(''); }}>
+                            <div className="flex items-center gap-2 cursor-pointer group" onClick={() => { setView('home'); setStep(0); setSearchQuery(''); setHistoryItemDetail(null); }}>
                                 <div className="w-9 h-9 md:w-10 md:h-10 bg-blue-600 flex items-center justify-center rounded-lg shadow-lg group-hover:rotate-12 transition-all">
                                     <Icon name="layers" size={20} />
                                 </div>
@@ -192,19 +291,28 @@
                             </div>
                             <div className="flex items-center gap-3 md:gap-6">
                                 <button 
-                                    onClick={() => setView('history')}
+                                    onClick={() => { setView('history'); setHistoryItemDetail(null); }}
                                     className="text-[10px] font-bold uppercase tracking-widest text-blue-300/60 hover:text-white transition-colors flex items-center gap-2"
                                 >
                                     <Icon name="history" size={14} />
                                     <span className="hidden sm:inline">{t.history}</span>
                                 </button>
+                                
+                                <div className="flex items-center gap-1 border border-blue-800 rounded-full px-2 py-1 bg-blue-900/20">
+                                    <Icon name="globe" size={12} className="text-blue-400" />
+                                    <select value={lang} onChange={e => setLang(e.target.value)} className="bg-transparent text-[10px] font-bold outline-none cursor-pointer border-none p-0 pr-1">
+                                        <option value="EN" className="text-black">EN</option>
+                                        <option value="FR" className="text-black">FR</option>
+                                    </select>
+                                </div>
+
                                 <button 
                                     onClick={() => isConnected ? setIsConnected(false) : setIsWalletModalOpen(true)} 
                                     className="bg-blue-600 hover:bg-blue-500 transition-colors px-4 md:px-6 py-2.5 rounded-lg text-[10px] font-bold uppercase tracking-widest shadow-lg flex items-center gap-2"
                                 >
                                     <Icon name="wallet" size={14} />
                                     <span className="hidden sm:inline">{isConnected ? "0x71...976F" : t.connect}</span>
-                                    <span className="sm:hidden text-[9px]">{isConnected ? "Connected" : "Wallet"}</span>
+                                    <span className="sm:hidden text-[9px]">{isConnected ? "0x71..." : "Link"}</span>
                                 </button>
                             </div>
                         </div>
@@ -214,14 +322,14 @@
                         <main className="pt-24 md:pt-32 animate-in fade-in duration-700">
                             {/* HERO */}
                             <section className="max-w-7xl mx-auto px-4 md:px-6 py-12 md:py-20 grid lg:grid-cols-2 gap-12 md:gap-20 items-center">
-                                <div className="space-y-6 md:space-y-10 order-2 lg:order-1">
+                                <div className="space-y-6 md:space-y-10 order-2 lg:order-1 text-center lg:text-left">
                                     <div className="inline-flex items-center gap-2 bg-blue-50 border border-blue-100 px-3 py-1 rounded-full">
                                         <div className="w-2 h-2 rounded-full bg-blue-600 animate-pulse"></div>
                                         <span className="text-[10px] font-bold text-blue-600 uppercase tracking-widest">Live on Polygon Network</span>
                                     </div>
                                     <h1 className="text-5xl md:text-8xl font-serif leading-[1] text-slate-900 tracking-tight">{t.hero}</h1>
-                                    <p className="text-lg md:text-xl text-slate-500 font-light leading-relaxed max-w-lg">{t.subHero}</p>
-                                    <button onClick={() => { setSelected('token'); setView('checkout'); }} className="bg-blue-600 hover:bg-blue-700 text-white px-10 py-5 rounded-xl font-bold uppercase tracking-widest text-xs flex items-center gap-3 shadow-2xl transition-all hover:-translate-y-1 touch-active">Acquire Genesis Token <Icon name="arrow-right" size={16}/></button>
+                                    <p className="text-lg md:text-xl text-slate-500 font-light leading-relaxed max-w-lg mx-auto lg:mx-0">{t.subHero}</p>
+                                    <button onClick={() => { setSelected('token'); setView('checkout'); }} className="bg-blue-600 hover:bg-blue-700 text-white px-10 py-5 rounded-xl font-bold uppercase tracking-widest text-xs flex items-center justify-center gap-3 shadow-2xl transition-all hover:-translate-y-1 touch-active mx-auto lg:mx-0">Acquire Genesis Token <Icon name="arrow-right" size={16}/></button>
                                 </div>
                                 <div className="relative order-1 lg:order-2">
                                     <div className="bg-[#0F172A] p-8 md:p-12 rounded-[2.5rem] md:rounded-[3rem] text-white shadow-2xl relative overflow-hidden group">
@@ -229,13 +337,23 @@
                                             <div className="w-14 h-14 md:w-16 md:h-16 bg-blue-600/20 border border-blue-500/30 rounded-2xl flex items-center justify-center">
                                                 <Icon name="cpu" size={28} className="text-blue-500" />
                                             </div>
-                                            <span className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-blue-400">Fixed Unit: €12.50</span>
+                                            <span className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-blue-400">Institutional Tech</span>
                                         </div>
                                         <h3 className="text-3xl md:text-4xl font-serif mb-6">{t.tokenTitle}</h3>
                                         <div className="space-y-4 md:space-y-5 text-blue-300 font-light text-sm">
-                                            <p className="flex items-center gap-3"><Icon name="shield-check" size={18} className="text-blue-500"/> Verified ERC20 Protocol</p>
-                                            <p className="flex items-center gap-3"><Icon name="zap" size={18} className="text-blue-500"/> Instant Institutional Allocation</p>
-                                            <p className="flex items-center gap-3"><Icon name="globe" size={18} className="text-blue-500"/> High-Frequency Polygon Settlement</p>
+                                            <p className="flex items-center gap-3"><Icon name="shield-check" size={18} className="text-blue-500"/> Verified ERC20 Issuance</p>
+                                            <p className="flex items-center gap-3"><Icon name="zap" size={18} className="text-blue-500"/> Instant Asset Allocation</p>
+                                            <p className="flex items-center gap-3"><Icon name="globe" size={18} className="text-blue-500"/> Fully Scalable Protocol</p>
+                                        </div>
+                                        <div className="mt-12 md:mt-16 pt-10 border-t border-white/10 flex justify-between items-end">
+                                            <div>
+                                                <p className="text-[10px] font-bold uppercase text-slate-500 mb-2">Market Rate</p>
+                                                <p className="text-4xl md:text-5xl font-light tracking-tighter text-blue-50">€{TOKEN_UNIT_PRICE.toFixed(2)}</p>
+                                            </div>
+                                            <div className="text-right">
+                                                <Icon name="refresh-ccw" size={18} className="text-blue-500/50 mb-2 ml-auto animate-spin-slow" />
+                                                <span className="text-[9px] md:text-[10px] uppercase font-bold text-slate-500">Auto-Settle</span>
+                                            </div>
                                         </div>
                                         <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600/5 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2"></div>
                                     </div>
@@ -247,12 +365,12 @@
                                 <div className="max-w-7xl mx-auto px-4 md:px-6">
                                     <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 md:mb-16 gap-8">
                                         <div className="space-y-4">
-                                            <h3 className="text-[11px] font-bold uppercase tracking-[0.4em] text-blue-600">Global Repository</h3>
-                                            <h2 className="text-3xl md:text-4xl font-serif text-slate-900 leading-tight">Digital Literature Catalog</h2>
+                                            <h3 className="text-[11px] font-bold uppercase tracking-[0.4em] text-blue-600">The Digital Library</h3>
+                                            <h2 className="text-3xl md:text-4xl font-serif text-slate-900 leading-tight">Elite Digital Literature</h2>
                                         </div>
                                         <div className="relative w-full md:w-96 group">
                                             <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-600 transition-colors"><Icon name="search" size={18} /></div>
-                                            <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search digital assets..." className="w-full bg-slate-50 border-2 border-transparent focus:border-blue-600/20 focus:bg-white rounded-2xl py-4 pl-12 pr-6 outline-none transition-all text-sm font-medium" />
+                                            <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search digital library..." className="w-full bg-slate-50 border-2 border-transparent focus:border-blue-600/20 focus:bg-white rounded-2xl py-4 pl-12 pr-6 outline-none transition-all text-sm font-medium" />
                                         </div>
                                     </div>
 
@@ -372,82 +490,18 @@
                                         </div>
                                     </div>
                                 ) : (
-                                    <div className="space-y-12 animate-fade-in">
-                                        {/* THE BILL / RECEIPT */}
-                                        <div className="bg-white p-8 md:p-12 rounded-[2rem] shadow-2xl border-t-8 border-blue-600 text-left relative overflow-hidden">
-                                            <div className="absolute top-0 right-0 p-8 opacity-10"><Icon name="layers" size={120} /></div>
-                                            
-                                            <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12 border-b pb-8">
-                                                <div>
-                                                    <h3 className="text-3xl font-serif italic text-blue-900">Proof of Acquisition</h3>
-                                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Deterministic Digital Receipt</p>
-                                                </div>
-                                                <div className="text-left md:text-right">
-                                                    <p className="text-[10px] font-bold text-slate-500 uppercase">Order Ref</p>
-                                                    <p className="font-mono text-xs text-blue-600">{currentTransactionId}</p>
-                                                </div>
-                                            </header>
-
-                                            <div className="grid md:grid-cols-2 gap-12 mb-12">
-                                                <div className="space-y-6">
-                                                    <div>
-                                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Entity for Delivery</p>
-                                                        <p className="text-sm font-medium">{email}</p>
-                                                    </div>
-                                                    {selected === 'token' && (
-                                                        <div>
-                                                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Polygon Destination</p>
-                                                            <p className="text-xs font-mono break-all text-blue-900 bg-blue-50 p-2 rounded">0x71C7656EC7ab88b098defB751B7401B5f6d8976F</p>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                                <div className="space-y-6">
-                                                    <div>
-                                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Acquisition Date</p>
-                                                        <p className="text-sm font-medium">{new Date().toLocaleString()}</p>
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Status</p>
-                                                        <span className="inline-flex items-center gap-2 text-green-600 text-[10px] font-bold uppercase border border-green-200 bg-green-50 px-3 py-1 rounded-full">✓ Fulfilled & Dispatched</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div className="receipt-border p-6 rounded-2xl space-y-4 mb-8">
-                                                <div className="flex justify-between items-center text-sm">
-                                                    <span className="text-slate-500 font-medium">{selected === 'token' ? 'Genesis Utility Token' : selected.title} (x{selected === 'token' ? qty : 1})</span>
-                                                    <span className="font-mono font-bold">€{total.toFixed(2)}</span>
-                                                </div>
-                                                <div className="flex justify-between items-center text-xs">
-                                                    <span className="text-slate-400 italic">Polygon L2 Network Gas Fee</span>
-                                                    <span className="text-green-600 font-bold uppercase text-[9px]">Sponsored by Protocol</span>
-                                                </div>
-                                                <div className="pt-4 border-t-2 border-slate-100 flex justify-between items-baseline">
-                                                    <span className="text-lg font-serif italic text-slate-900">Total Settlement</span>
-                                                    <span className="text-4xl font-light text-blue-600 tracking-tighter">€{total.toFixed(2)}</span>
-                                                </div>
-                                            </div>
-
-                                            <footer className="text-center opacity-30">
-                                                <p className="text-[9px] font-mono uppercase tracking-[0.5em]">LuxeDigital Institutional Ledger - 2026</p>
-                                            </footer>
-                                        </div>
-
-                                        <div className="flex flex-col sm:flex-row justify-center gap-4">
-                                            <button 
-                                                onClick={() => window.print()}
-                                                className="px-8 py-4 border-2 border-slate-200 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-slate-50 transition-all flex items-center justify-center gap-2"
-                                            >
-                                                <Icon name="printer" size={14} /> Download Bill
-                                            </button>
-                                            <button 
-                                                onClick={() => window.location.reload()} 
-                                                className="bg-[#0F172A] hover:bg-blue-600 text-white px-10 py-4 rounded-xl font-bold uppercase text-[10px] tracking-[0.2em] transition-all touch-active"
-                                            >
-                                                Return to Ecosystem
-                                            </button>
-                                        </div>
-                                    </div>
+                                    <DigitalReceipt 
+                                        data={{
+                                            id: currentTransactionId,
+                                            date: new Date().toLocaleString(),
+                                            email: email,
+                                            item: selected === 'token' ? 'Genesis Utility Token' : selected.title,
+                                            qty: selected === 'token' ? qty : 1,
+                                            amount: total,
+                                            wallet: isConnected ? '0x71C7656EC7ab88b098defB751B7401B5f6d8976F' : manualWallet
+                                        }} 
+                                        onBack={() => window.location.reload()}
+                                    />
                                 )}
                             </div>
                         </main>
@@ -455,50 +509,63 @@
 
                     {view === 'history' && (
                         <main className="pt-32 pb-24 max-w-4xl mx-auto px-4 md:px-6 animate-fade-in">
-                            <header className="flex justify-between items-end mb-12 border-b pb-8">
-                                <div className="space-y-2">
-                                    <h3 className="text-[11px] font-bold uppercase tracking-[0.4em] text-blue-600">Vault Access</h3>
-                                    <h2 className="text-4xl font-serif text-slate-900">Acquisition History</h2>
-                                </div>
-                                <button onClick={() => setView('home')} className="text-[10px] font-bold uppercase tracking-widest text-slate-400 hover:text-blue-600 transition-colors">{t.back} Home</button>
-                            </header>
-
-                            {purchaseHistory.length > 0 ? (
-                                <div className="space-y-6">
-                                    {purchaseHistory.map(record => (
-                                        <div key={record.id} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col md:flex-row justify-between gap-6 group hover:shadow-md transition-all">
-                                            <div className="flex gap-6 items-start">
-                                                <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center border border-blue-100 shrink-0">
-                                                    <Icon name={record.type === 'ERC20' ? 'cpu' : 'book'} size={24} className="text-blue-600" />
-                                                </div>
-                                                <div className="space-y-1">
-                                                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{record.date}</p>
-                                                    <h4 className="font-serif italic text-lg leading-tight text-slate-900">{record.item}</h4>
-                                                    <p className="text-xs text-blue-500 font-mono">{record.id}</p>
-                                                </div>
-                                            </div>
-                                            <div className="flex flex-row md:flex-col justify-between items-end md:text-right gap-2 border-t md:border-t-0 pt-4 md:pt-0">
-                                                <div className="text-left md:text-right">
-                                                    <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Settlement</p>
-                                                    <p className="font-mono font-bold text-blue-900 text-lg">€{record.amount.toFixed(2)}</p>
-                                                </div>
-                                                <span className="text-[9px] font-bold uppercase text-green-600 bg-green-50 px-3 py-1 rounded-full border border-green-100">Fulfilled</span>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
+                            {historyItemDetail ? (
+                                <DigitalReceipt 
+                                    data={historyItemDetail} 
+                                    onBack={() => setHistoryItemDetail(null)}
+                                />
                             ) : (
-                                <div className="text-center py-24 bg-white rounded-3xl border-2 border-dashed border-slate-100">
-                                    <Icon name="archive" size={48} className="text-slate-200 mx-auto mb-4" />
-                                    <p className="text-slate-400 font-medium text-sm tracking-wide">{t.noHistory}</p>
-                                </div>
+                                <>
+                                    <header className="flex justify-between items-end mb-12 border-b pb-8">
+                                        <div className="space-y-2">
+                                            <h3 className="text-[11px] font-bold uppercase tracking-[0.4em] text-blue-600">Vault Access</h3>
+                                            <h2 className="text-4xl font-serif text-slate-900">Acquisition History</h2>
+                                        </div>
+                                        <button onClick={() => setView('home')} className="text-[10px] font-bold uppercase tracking-widest text-slate-400 hover:text-blue-600 transition-colors">{t.back} Home</button>
+                                    </header>
+
+                                    {purchaseHistory.length > 0 ? (
+                                        <div className="space-y-6">
+                                            {purchaseHistory.map(record => (
+                                                <div 
+                                                    key={record.id} 
+                                                    onClick={() => setHistoryItemDetail(record)}
+                                                    className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col md:flex-row justify-between gap-6 group hover:shadow-md hover:border-blue-200 cursor-pointer transition-all active:scale-[0.99]"
+                                                >
+                                                    <div className="flex gap-6 items-start">
+                                                        <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center border border-blue-100 shrink-0 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                                                            <Icon name={record.type === 'ERC20' ? 'cpu' : 'book'} size={24} />
+                                                        </div>
+                                                        <div className="space-y-1">
+                                                            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{record.date}</p>
+                                                            <h4 className="font-serif italic text-lg leading-tight text-slate-900">{record.item}</h4>
+                                                            <p className="text-xs text-blue-500 font-mono">{record.id}</p>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex flex-row md:flex-col justify-between items-end md:text-right gap-2 border-t md:border-t-0 pt-4 md:pt-0">
+                                                        <div className="text-left md:text-right">
+                                                            <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Settlement</p>
+                                                            <p className="font-mono font-bold text-blue-900 text-lg">€{record.amount.toFixed(2)}</p>
+                                                        </div>
+                                                        <span className="text-[9px] font-bold uppercase text-blue-600 flex items-center gap-1">Details <Icon name="chevron-right" size={10} /></span>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div className="text-center py-24 bg-white rounded-3xl border-2 border-dashed border-slate-100">
+                                            <Icon name="archive" size={48} className="text-slate-200 mx-auto mb-4" />
+                                            <p className="text-slate-400 font-medium text-sm tracking-wide">{t.noHistory}</p>
+                                        </div>
+                                    )}
+                                </>
                             )}
                         </main>
                     )}
 
                     {/* WALLET MODAL */}
                     {isWalletModalOpen && (
-                        <div className="fixed inset-0 z-[100] bg-[#0F172A]/90 backdrop-blur-xl flex items-end sm:items-center justify-center p-0 sm:p-6 animate-fade-in">
+                        <div className="fixed inset-0 z-[100] bg-[#0F172A]/90 backdrop-blur-xl flex items-end sm:items-center justify-center p-0 sm:p-6 animate-fade-in no-print">
                             <div className="bg-white w-full max-w-lg rounded-t-[2.5rem] sm:rounded-[3.5rem] p-8 md:p-16 space-y-12 shadow-2xl relative border border-blue-50">
                                 <button onClick={() => setIsWalletModalOpen(false)} className="absolute top-10 right-10 text-slate-300 hover:text-black transition-colors"><Icon name="x" size={24} /></button>
                                 <div className="space-y-4">
@@ -526,25 +593,26 @@
                         </div>
                     )}
 
-                    <footer className="bg-[#0F172A] text-white py-16 md:py-32 px-4 md:px-6 mt-20 relative overflow-hidden">
+                    <footer className="bg-[#0F172A] text-white py-16 md:py-32 px-4 md:px-6 mt-20 relative overflow-hidden no-print">
+                        <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-blue-500/20 to-transparent"></div>
                         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-16 md:gap-20 relative z-10 text-center md:text-left">
                             <div className="md:col-span-2 space-y-8">
                                 <div className="flex items-center justify-center md:justify-start gap-3">
                                     <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center shadow-[0_0_15px_rgba(37,99,235,0.4)]"><Icon name="layers" size={16}/></div>
-                                    <span className="font-serif italic text-2xl">LuxeDigital</span>
+                                    <span className="font-serif italic text-2xl text-blue-50">LuxeDigital</span>
                                 </div>
-                                <p className="text-blue-200/30 text-sm font-light max-w-md mx-auto md:mx-0 leading-relaxed">Institutional digital asset issuance on the Polygon Network. Compliant, safe, and immutable delivery guaranteed.</p>
+                                <p className="text-blue-200/30 text-sm font-light max-w-md mx-auto md:mx-0 leading-relaxed">Institutional digital asset issuance on the Polygon Network. Engineered for stability and immutable delivery.</p>
                                 <div className="space-y-1 pt-4">
                                     <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-blue-500/80">Developed by Amit N</p>
-                                    <p className="text-[9px] font-mono text-blue-900 uppercase">Version 4.4.0-PRO</p>
+                                    <p className="text-[9px] font-mono text-blue-900 uppercase">Version 4.5.0-STABLE</p>
                                 </div>
                             </div>
                             <div className="space-y-6 text-slate-400">
                                 <h4 className="text-[11px] font-bold uppercase tracking-[0.4em] text-blue-400">Governance</h4>
                                 <ul className="space-y-3 text-[10px] font-bold uppercase tracking-widest text-blue-100/30">
-                                    <li className="hover:text-blue-400 cursor-pointer">Acquisition Terms</li>
-                                    <li className="hover:text-blue-400 cursor-pointer">Sovereignty Audit</li>
-                                    <li className="hover:text-blue-400 cursor-pointer text-blue-600">Protocol v4.4</li>
+                                    <li className="hover:text-blue-400 cursor-pointer">Issuance Terms</li>
+                                    <li className="hover:text-blue-400 cursor-pointer">Sovereignty</li>
+                                    <li className="hover:text-blue-400 cursor-pointer text-blue-600">Whitepaper</li>
                                 </ul>
                             </div>
                             <div className="space-y-6">
