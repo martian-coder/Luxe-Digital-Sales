@@ -8,7 +8,7 @@
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;600;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         body { font-family: 'Inter', sans-serif; scroll-behavior: smooth; overflow-x: hidden; }
@@ -172,41 +172,50 @@
                 hero: "Institutional Digital Assets.",
                 subHero: "Secure acquisition of Genesis ERC20 tokens and curated digital literature. Built on Polygon, designed for the high-end European economy.",
                 tokenTitle: "Genesis Utility Token",
-                buyNow: "Authorize & Purchase",
+                buyNow: "Confirm Acquisition",
                 email: "Delivery Email",
                 wallet: "Polygon Destination",
                 terms: "I acknowledge that transfers on the Polygon Network are irreversible and non-refundable upon delivery.",
-                status: ["Creating Checkout...", "Verifying Payment", "Pending Delivery", "Asset Delivered"],
+                status: ["Web3 Handshake...", "Verifying Payment", "Broadcasting to Polygon", "Asset Dispatched"],
                 connect: "Connect Wallet",
                 history: "History",
                 back: "Back",
-                noHistory: "No acquisitions found in current session."
+                noHistory: "No acquisitions found in local vault."
             },
             FR: {
                 hero: "Actifs Numériques Institutionnels.",
                 subHero: "Acquisition sécurisée de jetons Genesis ERC20 et littérature numérique. Conçu sur Polygon pour l'économie européenne haut de gamme.",
                 tokenTitle: "Jeton Utilitaire Genesis",
-                buyNow: "Autoriser et Acheter",
+                buyNow: "Confirmer l'Acquisition",
                 email: "Email de Livraison",
                 wallet: "Destination Polygon",
                 terms: "Je reconnais que les transferts sur le réseau Polygon sont irréversibles et non remboursables.",
-                status: ["Création du Paiement...", "Vérification", "Livraison en cours", "Actif Livré"],
+                status: ["Signature Web3...", "Vérification", "Diffusion sur Polygon", "Actif Envoyé"],
                 connect: "Connecter",
                 history: "Historique",
                 back: "Retour",
-                noHistory: "Aucune acquisition trouvée dans la session actuelle."
+                noHistory: "Aucune acquisition trouvée."
             }
         };
 
         function App() {
             const [lang, setLang] = useState('EN');
-            const [view, setView] = useState('home');
+            const [view, setView] = useState('home'); // home, checkout, payment, status, history
             const [selected, setSelected] = useState(null);
             const [step, setStep] = useState(0);
             const [searchQuery, setSearchQuery] = useState('');
+            const [paymentMethod, setPaymentMethod] = useState('card');
             
-            // Purchase History State
-            const [purchaseHistory, setPurchaseHistory] = useState([]);
+            // Persistent History
+            const [purchaseHistory, setPurchaseHistory] = useState(() => {
+                const saved = localStorage.getItem('lxd_history');
+                return saved ? JSON.parse(saved) : [];
+            });
+
+            useEffect(() => {
+                localStorage.setItem('lxd_history', JSON.stringify(purchaseHistory));
+            }, [purchaseHistory]);
+
             const [currentTransactionId, setCurrentTransactionId] = useState('');
             const [historyItemDetail, setHistoryItemDetail] = useState(null);
             
@@ -222,7 +231,7 @@
             const [manualWallet, setManualWallet] = useState('');
             const [accepted, setAccepted] = useState(false);
 
-            useEffect(() => { lucide.createIcons(); }, [view, step, isWalletModalOpen, isConnecting, searchQuery, historyItemDetail]);
+            useEffect(() => { lucide.createIcons(); }, [view, step, isWalletModalOpen, isConnecting, searchQuery, historyItemDetail, paymentMethod]);
 
             const t = TRANSLATIONS[lang];
             const activeWallet = isConnected ? "0x71C7...976F" : manualWallet;
@@ -247,11 +256,12 @@
                 }, 1200);
             };
 
-            const handlePurchase = () => {
-                if (total > 1000) {
-                    alert("Maximum purchase per transaction is €1000.00");
-                    return;
-                }
+            const initiatePayment = () => {
+                setView('payment');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            };
+
+            const handleFinalPurchase = () => {
                 const txId = `LXD-POLY-${Math.random().toString(36).substring(2, 12).toUpperCase()}`;
                 setCurrentTransactionId(txId);
                 setView('status');
@@ -312,7 +322,7 @@
                                 >
                                     <Icon name="wallet" size={14} />
                                     <span className="hidden sm:inline">{isConnected ? "0x71...976F" : t.connect}</span>
-                                    <span className="sm:hidden text-[9px]">{isConnected ? "0x71..." : "Link"}</span>
+                                    <span className="sm:hidden text-[9px]">{isConnected ? "Linked" : "Link"}</span>
                                 </button>
                             </div>
                         </div>
@@ -320,12 +330,25 @@
 
                     {view === 'home' && (
                         <main className="pt-24 md:pt-32 animate-in fade-in duration-700">
+                            {/* Network Alert Banner */}
+                            {isConnected && (
+                                <div className="max-w-7xl mx-auto px-4 md:px-6 mb-8">
+                                    <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-4 flex items-center justify-between">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                                            <p className="text-[11px] font-bold text-green-700 uppercase tracking-widest">Authenticated via {walletProvider} — Connected to Polygon Mainnet</p>
+                                        </div>
+                                        <Icon name="shield-check" className="text-green-500" size={16} />
+                                    </div>
+                                </div>
+                            )}
+
                             {/* HERO */}
                             <section className="max-w-7xl mx-auto px-4 md:px-6 py-12 md:py-20 grid lg:grid-cols-2 gap-12 md:gap-20 items-center">
                                 <div className="space-y-6 md:space-y-10 order-2 lg:order-1 text-center lg:text-left">
                                     <div className="inline-flex items-center gap-2 bg-blue-50 border border-blue-100 px-3 py-1 rounded-full">
-                                        <div className="w-2 h-2 rounded-full bg-blue-600 animate-pulse"></div>
-                                        <span className="text-[10px] font-bold text-blue-600 uppercase tracking-widest">Live on Polygon Network</span>
+                                        <Icon name="zap" size={12} className="text-blue-600" />
+                                        <span className="text-[10px] font-bold text-blue-600 uppercase tracking-widest">Active Institutional Pool</span>
                                     </div>
                                     <h1 className="text-5xl md:text-8xl font-serif leading-[1] text-slate-900 tracking-tight">{t.hero}</h1>
                                     <p className="text-lg md:text-xl text-slate-500 font-light leading-relaxed max-w-lg mx-auto lg:mx-0">{t.subHero}</p>
@@ -337,23 +360,13 @@
                                             <div className="w-14 h-14 md:w-16 md:h-16 bg-blue-600/20 border border-blue-500/30 rounded-2xl flex items-center justify-center">
                                                 <Icon name="cpu" size={28} className="text-blue-500" />
                                             </div>
-                                            <span className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-blue-400">Institutional Tech</span>
+                                            <span className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-blue-400">Institutional Settle</span>
                                         </div>
                                         <h3 className="text-3xl md:text-4xl font-serif mb-6">{t.tokenTitle}</h3>
                                         <div className="space-y-4 md:space-y-5 text-blue-300 font-light text-sm">
                                             <p className="flex items-center gap-3"><Icon name="shield-check" size={18} className="text-blue-500"/> Verified ERC20 Issuance</p>
-                                            <p className="flex items-center gap-3"><Icon name="zap" size={18} className="text-blue-500"/> Instant Asset Allocation</p>
-                                            <p className="flex items-center gap-3"><Icon name="globe" size={18} className="text-blue-500"/> Fully Scalable Protocol</p>
-                                        </div>
-                                        <div className="mt-12 md:mt-16 pt-10 border-t border-white/10 flex justify-between items-end">
-                                            <div>
-                                                <p className="text-[10px] font-bold uppercase text-slate-500 mb-2">Market Rate</p>
-                                                <p className="text-4xl md:text-5xl font-light tracking-tighter text-blue-50">€{TOKEN_UNIT_PRICE.toFixed(2)}</p>
-                                            </div>
-                                            <div className="text-right">
-                                                <Icon name="refresh-ccw" size={18} className="text-blue-500/50 mb-2 ml-auto animate-spin-slow" />
-                                                <span className="text-[9px] md:text-[10px] uppercase font-bold text-slate-500">Auto-Settle</span>
-                                            </div>
+                                            <p className="flex items-center gap-3"><Icon name="zap" size={18} className="text-blue-500"/> Instant Institutional Allocation</p>
+                                            <p className="flex items-center gap-3"><Icon name="globe" size={18} className="text-blue-500"/> Polygon Native Protocol</p>
                                         </div>
                                         <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600/5 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2"></div>
                                     </div>
@@ -365,12 +378,12 @@
                                 <div className="max-w-7xl mx-auto px-4 md:px-6">
                                     <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 md:mb-16 gap-8">
                                         <div className="space-y-4">
-                                            <h3 className="text-[11px] font-bold uppercase tracking-[0.4em] text-blue-600">The Digital Library</h3>
-                                            <h2 className="text-3xl md:text-4xl font-serif text-slate-900 leading-tight">Elite Digital Literature</h2>
+                                            <h3 className="text-[11px] font-bold uppercase tracking-[0.4em] text-blue-600">The Repository</h3>
+                                            <h2 className="text-3xl md:text-4xl font-serif text-slate-900 leading-tight">Digital Literature Catalog</h2>
                                         </div>
                                         <div className="relative w-full md:w-96 group">
                                             <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-600 transition-colors"><Icon name="search" size={18} /></div>
-                                            <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search digital library..." className="w-full bg-slate-50 border-2 border-transparent focus:border-blue-600/20 focus:bg-white rounded-2xl py-4 pl-12 pr-6 outline-none transition-all text-sm font-medium" />
+                                            <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search library..." className="w-full bg-slate-50 border-2 border-transparent focus:border-blue-600/20 focus:bg-white rounded-2xl py-4 pl-12 pr-6 outline-none transition-all text-sm font-medium" />
                                         </div>
                                     </div>
 
@@ -414,7 +427,7 @@
                                     <div className="space-y-10 md:space-y-12 pt-8 md:pt-12 border-t border-slate-100">
                                         <div className="space-y-4">
                                             <label className="text-[10px] font-bold uppercase text-slate-500 tracking-widest">Email Identity</label>
-                                            <input type="email" value={email} onChange={e => setEmail(e.target.value)} className="w-full bg-transparent border-b-2 border-slate-100 py-4 md:py-6 outline-none focus:border-blue-600 text-2xl md:text-3xl font-light placeholder:text-slate-200" placeholder="curator@example.com" />
+                                            <input type="email" value={email} onChange={e => setEmail(e.target.value)} className="w-full bg-transparent border-b-2 border-slate-100 py-4 md:py-6 outline-none focus:border-blue-600 text-2xl md:text-3xl font-light" placeholder="curator@example.com" />
                                         </div>
                                         {selected === 'token' && (
                                             <div className="grid md:grid-cols-2 gap-8 md:gap-12">
@@ -424,9 +437,9 @@
                                                 </div>
                                                 <div className="space-y-4">
                                                     <label className="text-[10px] font-bold uppercase text-slate-500 tracking-widest">Network</label>
-                                                    <div className="py-4 md:py-6 border-b-2 border-slate-100 flex items-center justify-between">
-                                                        <span className="text-lg font-mono text-slate-300">Polygon L2</span>
-                                                        <div className="w-3 h-3 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]"></div>
+                                                    <div className="py-4 md:py-6 border-b-2 border-slate-100 flex items-center justify-between text-slate-300">
+                                                        <span className="text-lg font-mono">Polygon L2</span>
+                                                        <div className="w-3 h-3 rounded-full bg-green-500"></div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -466,11 +479,116 @@
                                                 <input type="checkbox" checked={accepted} onChange={e => setAccepted(e.target.checked)} className="mt-1 w-6 h-6 border-slate-200 rounded-lg text-blue-600 focus:ring-0" />
                                                 <span className="text-[11px] text-slate-400 leading-relaxed group-hover:text-slate-500 transition-colors">{t.terms}</span>
                                             </label>
-                                            <button onClick={handlePurchase} disabled={!accepted || !email || (!isConnected && !manualWallet)} className="w-full bg-[#0F172A] hover:bg-blue-600 text-white py-5 rounded-2xl font-bold uppercase tracking-[0.2em] text-[10px] disabled:opacity-20 shadow-2xl transition-all touch-active">Confirm Acquisition</button>
+                                            <button onClick={initiatePayment} disabled={!accepted || !email || (!isConnected && !manualWallet)} className="w-full bg-[#0F172A] hover:bg-blue-600 text-white py-5 rounded-2xl font-bold uppercase tracking-[0.2em] text-[10px] disabled:opacity-20 shadow-2xl transition-all touch-active">{t.buyNow}</button>
                                         </div>
                                     </div>
                                 </div>
                             </div>
+                        </main>
+                    )}
+
+                    {view === 'payment' && (
+                        <main className="pt-32 pb-24 max-w-xl mx-auto px-4 md:px-6 animate-fade-in">
+                            <div className="bg-white rounded-[3rem] shadow-2xl overflow-hidden border border-slate-100">
+                                <header className="bg-slate-50 p-10 border-b border-slate-100">
+                                    <div className="flex justify-between items-center mb-8">
+                                        <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-blue-600">Secure Payment Gateway</span>
+                                        <div className="flex gap-2">
+                                            <Icon name="lock" size={12} className="text-slate-400" />
+                                            <Icon name="shield" size={12} className="text-slate-400" />
+                                        </div>
+                                    </div>
+                                    
+                                    {/* PAYMENT TABS */}
+                                    <div className="flex bg-slate-200/50 p-1 rounded-xl mb-10">
+                                        {['card', 'wallet', 'bank'].map(m => (
+                                            <button 
+                                                key={m}
+                                                onClick={() => setPaymentMethod(m)}
+                                                className={`flex-1 py-3 rounded-lg text-[9px] font-bold uppercase tracking-widest transition-all ${paymentMethod === m ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                                            >
+                                                {m === 'card' && 'Credit Card'}
+                                                {m === 'wallet' && 'Digital Wallet'}
+                                                {m === 'bank' && 'SEPA Transfer'}
+                                            </button>
+                                        ))}
+                                    </div>
+
+                                    <div className="flex justify-between items-end">
+                                        <div>
+                                            <p className="text-[10px] font-bold uppercase text-slate-400 mb-1">Settlement Total</p>
+                                            <p className="text-4xl font-light text-[#0F172A] tracking-tighter">€{total.toFixed(2)}</p>
+                                        </div>
+                                        <div className="text-right">
+                                            <p className="text-[9px] font-bold uppercase text-slate-400 mb-1">Merchant</p>
+                                            <p className="text-[11px] font-bold text-blue-900">LuxeDigital Protocol</p>
+                                        </div>
+                                    </div>
+                                </header>
+                                
+                                <div className="p-10 space-y-10">
+                                    {/* CARD VIEW */}
+                                    {paymentMethod === 'card' && (
+                                        <div className="space-y-6 animate-fade-in">
+                                            <div className="space-y-4">
+                                                <label className="text-[10px] font-bold uppercase text-slate-400 tracking-widest">Card Credentials</label>
+                                                <div className="relative">
+                                                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-blue-600"><Icon name="credit-card" size={18} /></div>
+                                                    <input type="text" defaultValue="4242 4242 4242 4242" className="w-full bg-slate-50 border-2 border-slate-100 focus:border-blue-600/20 rounded-xl py-4 pl-12 pr-4 outline-none transition-all font-mono text-sm" />
+                                                </div>
+                                                <div className="grid grid-cols-2 gap-4">
+                                                    <input type="text" defaultValue="12 / 28" className="w-full bg-slate-50 border-2 border-slate-100 focus:border-blue-600/20 rounded-xl py-4 px-4 outline-none transition-all font-mono text-sm" />
+                                                    <input type="text" defaultValue="999" className="w-full bg-slate-50 border-2 border-slate-100 focus:border-blue-600/20 rounded-xl py-4 px-4 outline-none transition-all font-mono text-sm" />
+                                                </div>
+                                            </div>
+                                            <p className="text-[9px] text-slate-400 leading-relaxed italic text-center">Protected by 3D-Secure 2.0 Institutional Encryption</p>
+                                        </div>
+                                    )}
+
+                                    {/* WALLET VIEW */}
+                                    {paymentMethod === 'wallet' && (
+                                        <div className="space-y-8 animate-fade-in py-4 text-center">
+                                            <div className="flex flex-col gap-4">
+                                                <button className="w-full bg-black text-white py-5 rounded-xl flex items-center justify-center gap-3 font-bold hover:opacity-90 transition-all touch-active shadow-lg">
+                                                    <Icon name="apple" size={20} /> Pay with Apple Pay
+                                                </button>
+                                                <button className="w-full bg-[#4285F4] text-white py-5 rounded-xl flex items-center justify-center gap-3 font-bold hover:opacity-90 transition-all touch-active shadow-lg">
+                                                    <Icon name="smartphone" size={20} /> Pay with Google Pay
+                                                </button>
+                                            </div>
+                                            <p className="text-[10px] text-slate-400 font-medium">Verify with FaceID or Passcode on next screen.</p>
+                                        </div>
+                                    )}
+
+                                    {/* BANK VIEW */}
+                                    {paymentMethod === 'bank' && (
+                                        <div className="space-y-6 animate-fade-in">
+                                            <div className="space-y-4">
+                                                <label className="text-[10px] font-bold uppercase text-slate-400 tracking-widest">Bank Details (SEPA)</label>
+                                                <input type="text" defaultValue="FR76 1234 5678 9012 3456 7890 123" className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl py-4 px-4 font-mono text-sm uppercase" />
+                                                <input type="text" defaultValue="SOCIÉTÉ GÉNÉRALE - PARIS" className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl py-4 px-4 text-[11px] font-bold text-slate-400" disabled />
+                                            </div>
+                                            <div className="bg-blue-50 border border-blue-100 p-4 rounded-xl">
+                                                <p className="text-[10px] text-blue-600 leading-relaxed font-medium">Instant transfer selected. Acquisition will finalize upon inter-bank confirmation (approx 10s).</p>
+                                            </div>
+                                        </div>
+                                    )}
+                                    
+                                    <div className="space-y-4">
+                                        <button onClick={handleFinalPurchase} className="w-full bg-[#0F172A] hover:bg-blue-600 text-white py-5 rounded-2xl font-bold uppercase text-xs tracking-[0.2em] transition-all touch-active flex items-center justify-center gap-3 shadow-2xl shadow-blue-900/10">
+                                            <Icon name="check-circle" size={18} /> Authorize Now
+                                        </button>
+                                        <button onClick={() => setView('checkout')} className="w-full text-[10px] font-bold uppercase text-slate-400 hover:text-red-500 tracking-[0.3em] transition-colors">Abort Transaction</button>
+                                    </div>
+
+                                    <div className="flex justify-center items-center gap-8 opacity-20 grayscale brightness-150">
+                                        <div className="h-6 w-10 bg-slate-400 rounded"></div>
+                                        <div className="h-6 w-10 bg-slate-400 rounded"></div>
+                                        <div className="h-6 w-10 bg-slate-400 rounded"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <p className="mt-8 text-center text-[10px] font-medium text-slate-400 uppercase tracking-widest">PCI DSS Level 1 Certified Node</p>
                         </main>
                     )}
 
@@ -480,11 +598,14 @@
                                 {step < 3 ? (
                                     <div className="space-y-12">
                                         <div className="flex justify-center relative">
-                                            <div className="w-36 h-36 md:w-48 md:h-48 rounded-full flex items-center justify-center bg-blue-50">
+                                            <div className="w-36 h-36 md:w-48 md:h-48 rounded-full flex items-center justify-center bg-blue-50 border border-blue-100 shadow-inner">
                                                 <Icon name="refresh-ccw" size={40} className="text-blue-600 animate-spin" />
                                             </div>
                                         </div>
-                                        <h2 className="text-4xl md:text-5xl font-serif italic text-slate-900">{t.status[step]}</h2>
+                                        <div className="space-y-4">
+                                            <h2 className="text-4xl md:text-5xl font-serif italic text-slate-900">{t.status[step]}</h2>
+                                            <p className="text-[10px] font-mono uppercase text-blue-400 tracking-[0.3em] animate-pulse-soft">Communicating with Polygon RPC...</p>
+                                        </div>
                                         <div className="grid grid-cols-4 gap-3 max-w-sm mx-auto">
                                             {[0, 1, 2, 3].map(i => <div key={i} className={`h-1.5 rounded-full transition-all duration-700 ${i <= step ? 'bg-blue-600 shadow-lg' : 'bg-slate-100'}`}></div>)}
                                         </div>
@@ -500,7 +621,7 @@
                                             amount: total,
                                             wallet: isConnected ? '0x71C7656EC7ab88b098defB751B7401B5f6d8976F' : manualWallet
                                         }} 
-                                        onBack={() => window.location.reload()}
+                                        onBack={() => { setView('home'); setStep(0); }}
                                     />
                                 )}
                             </div>
@@ -516,12 +637,12 @@
                                 />
                             ) : (
                                 <>
-                                    <header className="flex justify-between items-end mb-12 border-b pb-8">
-                                        <div className="space-y-2">
+                                    <header className="flex flex-col sm:flex-row justify-between items-end mb-12 border-b pb-8 gap-4">
+                                        <div className="space-y-2 text-left w-full">
                                             <h3 className="text-[11px] font-bold uppercase tracking-[0.4em] text-blue-600">Vault Access</h3>
                                             <h2 className="text-4xl font-serif text-slate-900">Acquisition History</h2>
                                         </div>
-                                        <button onClick={() => setView('home')} className="text-[10px] font-bold uppercase tracking-widest text-slate-400 hover:text-blue-600 transition-colors">{t.back} Home</button>
+                                        <button onClick={() => setView('home')} className="text-[10px] font-bold uppercase tracking-widest text-slate-400 hover:text-blue-600 transition-colors shrink-0">{t.back} Home</button>
                                     </header>
 
                                     {purchaseHistory.length > 0 ? (
@@ -536,7 +657,7 @@
                                                         <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center border border-blue-100 shrink-0 group-hover:bg-blue-600 group-hover:text-white transition-colors">
                                                             <Icon name={record.type === 'ERC20' ? 'cpu' : 'book'} size={24} />
                                                         </div>
-                                                        <div className="space-y-1">
+                                                        <div className="space-y-1 text-left">
                                                             <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{record.date}</p>
                                                             <h4 className="font-serif italic text-lg leading-tight text-slate-900">{record.item}</h4>
                                                             <p className="text-xs text-blue-500 font-mono">{record.id}</p>
@@ -547,7 +668,7 @@
                                                             <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Settlement</p>
                                                             <p className="font-mono font-bold text-blue-900 text-lg">€{record.amount.toFixed(2)}</p>
                                                         </div>
-                                                        <span className="text-[9px] font-bold uppercase text-blue-600 flex items-center gap-1">Details <Icon name="chevron-right" size={10} /></span>
+                                                        <span className="text-[9px] font-bold uppercase text-blue-600 flex items-center gap-1">Proof Access <Icon name="chevron-right" size={10} /></span>
                                                     </div>
                                                 </div>
                                             ))}
@@ -569,14 +690,14 @@
                             <div className="bg-white w-full max-w-lg rounded-t-[2.5rem] sm:rounded-[3.5rem] p-8 md:p-16 space-y-12 shadow-2xl relative border border-blue-50">
                                 <button onClick={() => setIsWalletModalOpen(false)} className="absolute top-10 right-10 text-slate-300 hover:text-black transition-colors"><Icon name="x" size={24} /></button>
                                 <div className="space-y-4">
-                                    <h3 className="text-3xl md:text-4xl font-serif italic text-slate-900">Protocol Link</h3>
-                                    <p className="text-slate-500 font-light text-sm">Select your digital identity interface.</p>
+                                    <h3 className="text-3xl md:text-4xl font-serif italic text-slate-900">Establish Secure Link</h3>
+                                    <p className="text-slate-500 font-light text-sm">Select your institutional digital identity interface.</p>
                                 </div>
                                 <div className="space-y-4">
                                     {['MetaMask', 'WalletConnect', 'Coinbase'].map(name => (
-                                        <button key={name} disabled={isConnecting} onClick={() => handleConnect(name)} className="w-full flex items-center justify-between p-8 border-2 border-slate-50 rounded-[2rem] hover:bg-blue-50 transition-all text-left disabled:opacity-50 touch-active">
+                                        <button key={name} disabled={isConnecting} onClick={() => handleConnect(name)} className="w-full flex items-center justify-between p-8 border-2 border-slate-50 rounded-[1.5rem] md:rounded-[2rem] hover:bg-blue-50 transition-all text-left disabled:opacity-50 touch-active group">
                                             <div className="flex items-center gap-4">
-                                                <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center"><Icon name="link" size={18} className="text-slate-400" /></div>
+                                                <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-colors"><Icon name="link" size={18} /></div>
                                                 <span className="font-bold text-[10px] md:text-xs uppercase tracking-widest text-slate-700">{name}</span>
                                             </div>
                                             <Icon name="chevron-right" size={18} className="text-slate-200" />
@@ -601,34 +722,34 @@
                                     <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center shadow-[0_0_15px_rgba(37,99,235,0.4)]"><Icon name="layers" size={16}/></div>
                                     <span className="font-serif italic text-2xl text-blue-50">LuxeDigital</span>
                                 </div>
-                                <p className="text-blue-200/30 text-sm font-light max-w-md mx-auto md:mx-0 leading-relaxed">Institutional digital asset issuance on the Polygon Network. Engineered for stability and immutable delivery.</p>
+                                <p className="text-blue-200/30 text-sm font-light max-w-md mx-auto md:mx-0 leading-relaxed">Institutional digital asset issuance on the Polygon Network. Engineered for absolute stability and immutable ledger delivery.</p>
                                 <div className="space-y-1 pt-4">
                                     <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-blue-500/80">Developed by Amit N</p>
-                                    <p className="text-[9px] font-mono text-blue-900 uppercase">Version 4.5.0-STABLE</p>
+                                    <p className="text-[9px] font-mono text-blue-900 uppercase">Version 4.6.0-ENTERPRISE</p>
                                 </div>
                             </div>
                             <div className="space-y-6 text-slate-400">
-                                <h4 className="text-[11px] font-bold uppercase tracking-[0.4em] text-blue-400">Governance</h4>
+                                <h4 className="text-[11px] font-bold uppercase tracking-[0.4em] text-blue-400">Legal Standard</h4>
                                 <ul className="space-y-3 text-[10px] font-bold uppercase tracking-widest text-blue-100/30">
-                                    <li className="hover:text-blue-400 cursor-pointer">Issuance Terms</li>
-                                    <li className="hover:text-blue-400 cursor-pointer">Sovereignty</li>
-                                    <li className="hover:text-blue-400 cursor-pointer text-blue-600">Whitepaper</li>
+                                    <li className="hover:text-blue-400 cursor-pointer">Digital Issuance Terms</li>
+                                    <li className="hover:text-blue-400 cursor-pointer">Sovereignty Audit</li>
+                                    <li className="hover:text-blue-400 cursor-pointer text-blue-600">Whitepaper v4.6</li>
                                 </ul>
                             </div>
                             <div className="space-y-6">
-                                <h4 className="text-[11px] font-bold uppercase tracking-[0.4em] text-blue-400">Ledger</h4>
+                                <h4 className="text-[11px] font-bold uppercase tracking-[0.4em] text-blue-400">Node Status</h4>
                                 <div className="flex items-center justify-center md:justify-start gap-3 text-green-400 bg-green-400/5 px-4 py-2 rounded-lg border border-green-400/10 w-fit mx-auto md:mx-0">
-                                    <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse shadow-[0_0_10px_rgba(34,197,94,0.6)]"></div> 
-                                    <span className="text-[10px] uppercase font-bold tracking-widest">Polygon Online</span>
+                                    <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse shadow-[0_0_10px_rgba(34,197,94,0.6)]"></div> 
+                                    <span className="text-[10px] uppercase font-bold tracking-widest tracking-[0.2em]">Polygon Mainnet</span>
                                 </div>
                             </div>
                         </div>
                         <div className="max-w-7xl mx-auto pt-16 md:pt-24 border-t border-white/5 mt-10 flex flex-col md:flex-row justify-between items-center gap-6 text-[10px] md:text-[11px] font-bold uppercase tracking-[0.6em] text-blue-100/10">
                             <span>&copy; 2026 LuxeDigital Protocol</span>
                             <div className="flex gap-4 md:gap-8">
-                                <span>Paris</span>
-                                <span>London</span>
-                                <span>Frankfurt</span>
+                                <span className="hover:text-white transition-colors cursor-pointer">Paris</span>
+                                <span className="hover:text-white transition-colors cursor-pointer">London</span>
+                                <span className="hover:text-white transition-colors cursor-pointer">Frankfurt</span>
                             </div>
                         </div>
                     </footer>
