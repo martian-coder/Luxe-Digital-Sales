@@ -11,7 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;600;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        body { font-family: 'Inter', sans-serif; scroll-behavior: smooth; }
+        body { font-family: 'Inter', sans-serif; scroll-behavior: smooth; overflow-x: hidden; }
         .font-serif { font-family: 'Playfair Display', serif; }
         .font-mono { font-family: 'JetBrains Mono', monospace; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
@@ -20,17 +20,40 @@
         .animate-fade-in { animation: fade-in 0.7s ease-out forwards; }
         @keyframes pulse-soft { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
         .animate-pulse-soft { animation: pulse-soft 2s infinite ease-in-out; }
+        .touch-active:active { transform: scale(0.98); }
+        .image-overlay { background: linear-gradient(to top, rgba(15, 23, 42, 0.9) 0%, rgba(15, 23, 42, 0.2) 50%, transparent 100%); }
     </style>
 </head>
-<body class="bg-[#F8FAFC] text-[#0F172A]">
+<body class="bg-[#F8FAFC] text-[#0F172A] antialiased">
     <div id="root"></div>
 
     <script type="text/babel">
         const { useState, useMemo, useEffect } = React;
 
-        // --- Lucide Icon Wrapper ---
+        // --- UI Components ---
         const Icon = ({ name, size = 20, className = "" }) => {
             return <i data-lucide={name} style={{ width: size, height: size }} className={className}></i>;
+        };
+
+        const SafeImage = ({ src, alt, title }) => {
+            const [error, setError] = useState(false);
+            if (error || !src) {
+                return (
+                    <div className="w-full h-full bg-gradient-to-br from-blue-900 to-blue-700 flex flex-col items-center justify-center p-8 text-center">
+                        <Icon name="book-open" size={48} className="text-blue-400/50 mb-4" />
+                        <span className="font-serif italic text-white/90 text-lg leading-tight">{title}</span>
+                        <div className="mt-4 w-12 h-1 bg-blue-500/30 rounded-full"></div>
+                    </div>
+                );
+            }
+            return (
+                <img 
+                    src={src} 
+                    alt={alt} 
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                    onError={() => setError(true)}
+                />
+            );
         };
 
         // --- DATA ---
@@ -40,28 +63,118 @@
         const CATEGORIES = [
             {
                 id: 'cat-1',
-                name: 'Blockchain Fundamentals',
+                name: 'Global Bestsellers',
                 books: [
-                    { id: 'eb-01', title: 'The Polygon Horizon', price: 29.00, tag: 'Best Seller', image: 'https://images.unsplash.com/photo-1639322537228-f710d846310a?auto=format&fit=crop&q=80&w=800&h=1000' },
-                    { id: 'eb-02', title: 'Consensus 101', price: 19.00, tag: 'Beginner', image: 'https://images.unsplash.com/photo-1644088379091-85d94348e351?auto=format&fit=crop&q=80&w=800&h=1000' },
-                    { id: 'eb-03', title: 'Ethereum Evolution', price: 35.00, tag: 'New', image: 'https://images.unsplash.com/photo-1621504450181-5d356f63d3ee?auto=format&fit=crop&q=80&w=800&h=1000' },
+                    { 
+                        id: 'eb-01', 
+                        title: 'The Bitcoin Standard', 
+                        price: 29.00, 
+                        tag: 'Bestseller', 
+                        image: 'https://images.unsplash.com/photo-1518546305927-5a555bb7020d?q=80&w=800&auto=format&fit=crop' 
+                    },
+                    { 
+                        id: 'eb-02', 
+                        title: 'Mastering Bitcoin', 
+                        price: 39.00, 
+                        tag: 'Technical', 
+                        image: 'https://images.unsplash.com/photo-1621416848446-9f6efdec403d?q=80&w=800&auto=format&fit=crop' 
+                    },
+                    { 
+                        id: 'eb-03', 
+                        title: 'Blockchain Revolution', 
+                        price: 35.00, 
+                        tag: 'Essential', 
+                        image: 'https://images.unsplash.com/photo-1639762681485-074b7f938ba0?q=80&w=800&auto=format&fit=crop' 
+                    }
                 ]
             },
             {
                 id: 'cat-2',
-                name: 'Investment Strategies',
+                name: 'Strategic Assets',
                 books: [
-                    { id: 'eb-04', title: 'Digital Sovereignty', price: 45.00, tag: 'Premium', image: 'https://images.unsplash.com/photo-1642104704074-907c0698cbd9?auto=format&fit=crop&q=80&w=800&h=1000' },
-                    { id: 'eb-05', title: 'Yield Dynamics', price: 55.00, tag: 'Expert', image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=800&h=1000' },
-                    { id: 'eb-06', title: 'Portfolio Balancing', price: 32.00, tag: 'Stable', image: 'https://images.unsplash.com/photo-1611974714013-3c8c6133f1f7?auto=format&fit=crop&q=80&w=800&h=1000' },
+                    { 
+                        id: 'eb-04', 
+                        title: 'Digital Gold', 
+                        price: 45.00, 
+                        tag: 'Recommended', 
+                        image: 'https://images.unsplash.com/photo-1620321023374-d1a68fbc720d?q=80&w=800&auto=format&fit=crop' 
+                    },
+                    { 
+                        id: 'eb-05', 
+                        title: 'The Infinite Machine', 
+                        price: 55.00, 
+                        tag: 'New Release', 
+                        image: 'https://images.unsplash.com/photo-1640341719942-0268302abc0a?q=80&w=800&auto=format&fit=crop' 
+                    },
+                    { 
+                        id: 'eb-06', 
+                        title: 'Layer 2 Economics', 
+                        price: 32.00, 
+                        tag: 'Advanced', 
+                        image: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=800&auto=format&fit=crop' 
+                    }
+                ]
+            },
+            {
+                id: 'cat-3',
+                name: 'Security & Governance',
+                books: [
+                    { 
+                        id: 'eb-07', 
+                        title: 'Smart Contract Auditing', 
+                        price: 89.00, 
+                        tag: 'Expert', 
+                        image: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=800&auto=format&fit=crop' 
+                    },
+                    { 
+                        id: 'eb-08', 
+                        title: 'The DAO Handbook', 
+                        price: 49.00, 
+                        tag: 'Governance', 
+                        image: 'https://images.unsplash.com/photo-1639322537228-f710d846310a?q=80&w=800&auto=format&fit=crop' 
+                    },
+                    { 
+                        id: 'eb-09', 
+                        title: 'Privacy & Sovereignty', 
+                        price: 42.00, 
+                        tag: 'Compliance', 
+                        image: 'https://images.unsplash.com/photo-1563986768609-322da13575f3?q=80&w=800&auto=format&fit=crop' 
+                    }
+                ]
+            },
+            {
+                id: 'cat-4',
+                name: 'Economics & Finance',
+                books: [
+                    { 
+                        id: 'eb-10', 
+                        title: 'Institutional DeFi', 
+                        price: 65.00, 
+                        tag: 'Financial', 
+                        image: 'https://images.unsplash.com/photo-1611974714013-3c8c6133f1f7?q=80&w=800&auto=format&fit=crop' 
+                    },
+                    { 
+                        id: 'eb-11', 
+                        title: 'Tokenomics Design', 
+                        price: 59.00, 
+                        tag: 'Strategy', 
+                        image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=800&auto=format&fit=crop' 
+                    },
+                    { 
+                        id: 'eb-12', 
+                        title: 'Yield Generation', 
+                        price: 35.00, 
+                        tag: 'Portfolio', 
+                        image: 'https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?q=80&w=800&auto=format&fit=crop' 
+                    }
                 ]
             }
         ];
 
         const TRANSLATIONS = {
             EN: {
-                hero: "The Standard for Digital Assets.",
-                subHero: "Secure acquisition of Genesis ERC20 tokens and curated digital literature. Built on Polygon, designed for the European digital economy.",
+                hero: "Institutional Digital Assets.",
+                subHero: "Secure acquisition of Genesis ERC20 tokens and curated digital literature. Built on Polygon, designed for the high-end European economy.",
                 tokenTitle: "Genesis Utility Token",
                 buyNow: "Authorize & Purchase",
                 email: "Delivery Email",
@@ -70,11 +183,12 @@
                 status: ["Creating Checkout...", "Verifying Payment", "Pending Delivery", "Asset Delivered"],
                 connect: "Connect Wallet",
                 walletProvider: "Select Provider",
-                waitingSign: "Waiting for Signature..."
+                waitingSign: "Waiting for Signature...",
+                searchPlaceholder: "Search global library..."
             },
             FR: {
-                hero: "La Référence des Actifs Numériques.",
-                subHero: "Acquisition sécurisée de jetons Genesis ERC20 et littérature numérique. Conçu sur Polygon pour l'économie européenne.",
+                hero: "Actifs Numériques Institutionnels.",
+                subHero: "Acquisition sécurisée de jetons Genesis ERC20 et littérature numérique. Conçu sur Polygon pour l'économie européenne haut de gamme.",
                 tokenTitle: "Jeton Utilitaire Genesis",
                 buyNow: "Autoriser et Acheter",
                 email: "Email de Livraison",
@@ -83,7 +197,8 @@
                 status: ["Création du Paiement...", "Vérification", "Livraison en cours", "Actif Livré"],
                 connect: "Connecter",
                 walletProvider: "Choisir un Fournisseur",
-                waitingSign: "Attente de Signature..."
+                waitingSign: "Attente de Signature...",
+                searchPlaceholder: "Rechercher dans la bibliothèque..."
             }
         };
 
@@ -92,24 +207,32 @@
             const [view, setView] = useState('home');
             const [selected, setSelected] = useState(null);
             const [step, setStep] = useState(0);
+            const [searchQuery, setSearchQuery] = useState('');
             
-            // Wallet States
             const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
             const [isConnecting, setIsConnecting] = useState(false);
             const [isConnected, setIsConnected] = useState(false);
             const [walletProvider, setWalletProvider] = useState(null);
             
-            // Form States
             const [email, setEmail] = useState('');
             const [qty, setQty] = useState(1);
             const [manualWallet, setManualWallet] = useState('');
             const [accepted, setAccepted] = useState(false);
 
-            useEffect(() => { lucide.createIcons(); }, [view, step, isWalletModalOpen, isConnecting]);
+            useEffect(() => { lucide.createIcons(); }, [view, step, isWalletModalOpen, isConnecting, searchQuery]);
 
             const t = TRANSLATIONS[lang];
             const activeWallet = isConnected ? "0x71C7...976F" : manualWallet;
             const total = selected === 'token' ? (qty * TOKEN_UNIT_PRICE) : (selected?.price || 0);
+
+            const filteredCategories = useMemo(() => {
+                return CATEGORIES.map(cat => ({
+                    ...cat,
+                    books: cat.books.filter(book => 
+                        book.title.toLowerCase().includes(searchQuery.toLowerCase())
+                    )
+                })).filter(cat => cat.books.length > 0);
+            }, [searchQuery]);
 
             const handleConnect = (provider) => {
                 setIsConnecting(true);
@@ -136,77 +259,74 @@
             };
 
             return (
-                <div className="min-h-screen selection:bg-blue-100">
+                <div className="min-h-screen selection:bg-blue-100 overflow-x-hidden">
                     {/* NAV */}
-                    <nav className="fixed top-0 w-full z-50 bg-[#0F172A] text-white px-6 py-4 shadow-2xl border-b border-blue-900/30">
+                    <nav className="fixed top-0 w-full z-50 bg-[#0F172A] text-white px-4 md:px-6 py-4 shadow-2xl border-b border-blue-900/30">
                         <div className="max-w-7xl mx-auto flex justify-between items-center">
-                            <div className="flex items-center gap-2 cursor-pointer group" onClick={() => { setView('home'); setStep(0); }}>
-                                <div className="w-10 h-10 bg-blue-600 flex items-center justify-center rounded-lg shadow-[0_0_15px_rgba(37,99,235,0.4)] group-hover:rotate-12 transition-all">
-                                    <Icon name="layers" />
+                            <div className="flex items-center gap-2 cursor-pointer group" onClick={() => { setView('home'); setStep(0); setSearchQuery(''); }}>
+                                <div className="w-9 h-9 md:w-10 md:h-10 bg-blue-600 flex items-center justify-center rounded-lg shadow-lg group-hover:rotate-12 transition-all">
+                                    <Icon name="layers" size={20} />
                                 </div>
-                                <span className="font-serif italic text-2xl tracking-tighter">LuxeDigital</span>
+                                <span className="font-serif italic text-xl md:text-2xl tracking-tighter">LuxeDigital</span>
                             </div>
-                            <div className="flex items-center gap-6">
-                                <div className="hidden md:flex gap-6 text-[10px] font-bold uppercase tracking-[0.2em] text-blue-300/40">
-                                    <span className="hover:text-blue-400 cursor-pointer transition-colors">Ecosystem</span>
-                                    <span className="hover:text-blue-400 cursor-pointer transition-colors">Governance</span>
-                                </div>
-                                <select value={lang} onChange={e => setLang(e.target.value)} className="bg-blue-900/40 text-[10px] font-bold border border-blue-800 rounded-full px-3 py-1.5 outline-none cursor-pointer">
+                            <div className="flex items-center gap-3 md:gap-6">
+                                <select value={lang} onChange={e => setLang(e.target.value)} className="bg-blue-900/40 text-[10px] font-bold border border-blue-800 rounded-full px-2 md:px-3 py-1.5 outline-none cursor-pointer">
                                     <option value="EN">EN</option>
                                     <option value="FR">FR</option>
                                 </select>
                                 <button 
                                     onClick={() => isConnected ? setIsConnected(false) : setIsWalletModalOpen(true)} 
-                                    className="bg-blue-600 hover:bg-blue-500 transition-colors px-6 py-2.5 rounded-lg text-[10px] font-bold uppercase tracking-widest shadow-lg flex items-center gap-2"
+                                    className="bg-blue-600 hover:bg-blue-500 transition-colors px-4 md:px-6 py-2.5 rounded-lg text-[10px] font-bold uppercase tracking-widest shadow-lg flex items-center gap-2"
                                 >
                                     <Icon name="wallet" size={14} />
-                                    {isConnected ? "0x71...976F" : t.connect}
+                                    <span className="hidden sm:inline">{isConnected ? "0x71...976F" : t.connect}</span>
+                                    <span className="sm:hidden text-[9px]">{isConnected ? "Connected" : "Wallet"}</span>
                                 </button>
                             </div>
                         </div>
                     </nav>
 
                     {view === 'home' && (
-                        <main className="pt-32 animate-fade-in">
+                        <main className="pt-24 md:pt-32 animate-in fade-in duration-700">
                             {/* HERO */}
-                            <section className="max-w-7xl mx-auto px-6 py-20 grid lg:grid-cols-2 gap-20 items-center">
-                                <div className="space-y-10">
+                            <section className="max-w-7xl mx-auto px-4 md:px-6 py-12 md:py-20 grid lg:grid-cols-2 gap-12 md:gap-20 items-center">
+                                <div className="space-y-6 md:space-y-10 order-2 lg:order-1">
                                     <div className="inline-flex items-center gap-2 bg-blue-50 border border-blue-100 px-3 py-1 rounded-full">
                                         <div className="w-2 h-2 rounded-full bg-blue-600 animate-pulse"></div>
-                                        <span className="text-[10px] font-bold text-blue-600 uppercase tracking-widest">Active on Polygon Mainnet</span>
+                                        <span className="text-[10px] font-bold text-blue-600 uppercase tracking-widest">Live on Polygon Network</span>
                                     </div>
-                                    <h1 className="text-6xl md:text-8xl font-serif leading-[0.95] text-slate-900 tracking-tight">{t.hero}</h1>
-                                    <p className="text-xl text-slate-500 font-light leading-relaxed max-w-lg">{t.subHero}</p>
-                                    <div className="flex gap-4">
-                                        <button onClick={() => { setSelected('token'); setView('checkout'); }} className="bg-blue-600 hover:bg-blue-700 text-white px-10 py-5 rounded-xl font-bold uppercase tracking-widest text-xs flex items-center gap-3 shadow-2xl shadow-blue-600/20 transition-all hover:-translate-y-1">Acquire Token <Icon name="arrow-right" size={16}/></button>
-                                        <div className="flex flex-col justify-center px-4">
-                                            <span className="text-[10px] font-bold uppercase text-slate-400">Fixed Rate</span>
-                                            <span className="font-mono text-blue-900 font-bold">€{TOKEN_UNIT_PRICE}/unit</span>
+                                    <h1 className="text-5xl md:text-8xl font-serif leading-[1] text-slate-900 tracking-tight">{t.hero}</h1>
+                                    <p className="text-lg md:text-xl text-slate-500 font-light leading-relaxed max-w-lg">{t.subHero}</p>
+                                    <div className="flex flex-col sm:flex-row gap-4">
+                                        <button onClick={() => { setSelected('token'); setView('checkout'); }} className="bg-blue-600 hover:bg-blue-700 text-white px-10 py-5 rounded-xl font-bold uppercase tracking-widest text-xs flex items-center justify-center gap-3 shadow-2xl transition-all hover:-translate-y-1 touch-active">Acquire Token <Icon name="arrow-right" size={16}/></button>
+                                        <div className="flex flex-row sm:flex-col justify-center items-center sm:items-start px-4 gap-2 sm:gap-0">
+                                            <span className="text-[10px] font-bold uppercase text-slate-400">Stable Rate</span>
+                                            <span className="font-mono text-blue-900 font-bold text-lg">€{TOKEN_UNIT_PRICE}/unit</span>
                                         </div>
                                     </div>
                                 </div>
-                                <div className="relative">
-                                    <div className="bg-[#0F172A] p-12 rounded-[3rem] text-white shadow-2xl relative overflow-hidden group">
-                                        <div className="flex justify-between items-start mb-12">
-                                            <div className="w-16 h-16 bg-blue-600/20 border border-blue-500/30 rounded-2xl flex items-center justify-center">
-                                                <Icon name="cpu" size={32} className="text-blue-500" />
+                                <div className="relative order-1 lg:order-2">
+                                    <div className="bg-[#0F172A] p-8 md:p-12 rounded-[2.5rem] md:rounded-[3rem] text-white shadow-2xl relative overflow-hidden group">
+                                        <div className="flex justify-between items-start mb-8 md:mb-12">
+                                            <div className="w-14 h-14 md:w-16 md:h-16 bg-blue-600/20 border border-blue-500/30 rounded-2xl flex items-center justify-center">
+                                                <Icon name="cpu" size={28} className="text-blue-500" />
                                             </div>
-                                            <span className="text-[10px] font-bold uppercase tracking-widest text-blue-400">Digital Identity Required</span>
+                                            <span className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-blue-400">Institutional Tech</span>
                                         </div>
-                                        <h3 className="text-4xl font-serif mb-6">{t.tokenTitle}</h3>
-                                        <div className="space-y-5 text-blue-300 font-light text-sm">
-                                            <p className="flex items-center gap-3"><Icon name="shield-check" size={18} className="text-blue-500"/> Immutable ERC20 Protocol</p>
-                                            <p className="flex items-center gap-3"><Icon name="zap" size={18} className="text-blue-500"/> Deterministic Auto-Fulfilment</p>
-                                            <p className="flex items-center gap-3"><Icon name="globe" size={18} className="text-blue-500"/> Native Polygon Settlement</p>
+                                        <h3 className="text-3xl md:text-4xl font-serif mb-6">{t.tokenTitle}</h3>
+                                        <div className="space-y-4 md:space-y-5 text-blue-300 font-light text-sm">
+                                            <p className="flex items-center gap-3"><Icon name="shield-check" size={18} className="text-blue-500"/> Verified ERC20 Issuance</p>
+                                            <p className="flex items-center gap-3"><Icon name="zap" size={18} className="text-blue-500"/> Instant Asset Allocation</p>
+                                            <p className="flex items-center gap-3"><Icon name="globe" size={18} className="text-blue-500"/> Fully Scalable Protocol</p>
                                         </div>
-                                        <div className="mt-16 pt-10 border-t border-white/10 flex justify-between items-end">
+                                        <div className="mt-12 md:mt-16 pt-10 border-t border-white/10 flex justify-between items-end">
                                             <div>
-                                                <p className="text-[10px] font-bold uppercase text-slate-500 mb-2">Initial Liquidity</p>
-                                                <p className="text-5xl font-light tracking-tighter text-blue-50">€{TOKEN_UNIT_PRICE.toFixed(2)}</p>
+                                                <p className="text-[10px] font-bold uppercase text-slate-500 mb-2">Market Price</p>
+                                                <p className="text-4xl md:text-5xl font-light tracking-tighter text-blue-50">€{TOKEN_UNIT_PRICE.toFixed(2)}</p>
                                             </div>
                                             <div className="text-right">
-                                                <Icon name="refresh-ccw" size={20} className="text-blue-500/50 mb-2 ml-auto animate-spin-slow" />
-                                                <span className="text-[10px] uppercase font-bold text-slate-500">24h Settlement</span>
+                                                <Icon name="refresh-ccw" size={18} className="text-blue-500/50 mb-2 ml-auto animate-spin-slow" />
+                                                <span className="text-[9px] md:text-[10px] uppercase font-bold text-slate-500">Auto-Update</span>
                                             </div>
                                         </div>
                                         <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600/5 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2"></div>
@@ -214,180 +334,142 @@
                                 </div>
                             </section>
 
-                            {/* CATEGORIES */}
-                            <section className="bg-white py-24 border-y border-slate-100">
-                                <div className="max-w-7xl mx-auto px-6">
-                                    <div className="flex justify-between items-end mb-16">
+                            {/* DIGITAL LIBRARY SECTION */}
+                            <section className="bg-white py-16 md:py-24 border-y border-slate-100">
+                                <div className="max-w-7xl mx-auto px-4 md:px-6">
+                                    <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 md:mb-16 gap-8">
                                         <div className="space-y-4">
-                                            <h3 className="text-[11px] font-bold uppercase tracking-[0.4em] text-blue-600">{t.ebooksTitle}</h3>
-                                            <h2 className="text-4xl font-serif text-slate-900">Expert Insights & Architecture</h2>
+                                            <h3 className="text-[11px] font-bold uppercase tracking-[0.4em] text-blue-600">The Digital Library</h3>
+                                            <h2 className="text-3xl md:text-4xl font-serif text-slate-900 leading-tight">Elite Digital Literature</h2>
                                         </div>
-                                        <div className="flex gap-2">
-                                            <div className="w-8 h-1 bg-blue-600 rounded-full"></div>
-                                            <div className="w-4 h-1 bg-slate-100 rounded-full"></div>
+                                        
+                                        {/* SEARCH BAR */}
+                                        <div className="relative w-full md:w-96 group">
+                                            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-600 transition-colors">
+                                                <Icon name="search" size={18} />
+                                            </div>
+                                            <input 
+                                                type="text" 
+                                                value={searchQuery}
+                                                onChange={(e) => setSearchQuery(e.target.value)}
+                                                placeholder={t.searchPlaceholder}
+                                                className="w-full bg-slate-50 border-2 border-transparent focus:border-blue-600/20 focus:bg-white rounded-2xl py-4 pl-12 pr-6 outline-none transition-all text-sm font-medium"
+                                            />
+                                            {searchQuery && (
+                                                <button 
+                                                    onClick={() => setSearchQuery('')}
+                                                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-300 hover:text-slate-500"
+                                                >
+                                                    <Icon name="x" size={16} />
+                                                </button>
+                                            )}
                                         </div>
                                     </div>
 
-                                    {CATEGORIES.map(cat => (
-                                        <div key={cat.id} className="mb-20 last:mb-0">
-                                            <div className="flex items-center gap-4 mb-10">
-                                                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 whitespace-nowrap">{cat.name}</span>
-                                                <div className="w-full h-[1px] bg-slate-100"></div>
-                                            </div>
-                                            <div className="flex gap-10 overflow-x-auto pb-10 no-scrollbar snap-x">
-                                                {cat.books.map(book => (
-                                                    <div key={book.id} onClick={() => { setSelected(book); setView('checkout'); }} className="flex-shrink-0 w-80 group cursor-pointer snap-start">
-                                                        <div className="aspect-[3/4] rounded-3xl overflow-hidden mb-8 shadow-xl group-hover:shadow-2xl group-hover:-translate-y-3 transition-all duration-700 relative bg-slate-100">
-                                                            <img src={book.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" />
-                                                            <div className="absolute inset-0 bg-gradient-to-t from-blue-950/80 to-transparent opacity-40 group-hover:opacity-60 transition-opacity"></div>
-                                                            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all translate-y-4 group-hover:translate-y-0">
-                                                                <span className="bg-white text-blue-900 px-8 py-3 rounded-xl font-bold uppercase text-[10px] tracking-widest shadow-2xl">Acquire Literature</span>
+                                    {filteredCategories.length > 0 ? (
+                                        filteredCategories.map(cat => (
+                                            <div key={cat.id} className="mb-16 md:mb-20 last:mb-0 animate-fade-in">
+                                                <div className="flex items-center gap-4 mb-8 md:mb-10">
+                                                    <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 whitespace-nowrap">{cat.name}</span>
+                                                    <div className="w-full h-[1px] bg-slate-100"></div>
+                                                </div>
+                                                <div className="flex gap-6 md:gap-10 overflow-x-auto pb-8 md:pb-10 no-scrollbar snap-x">
+                                                    {cat.books.map(book => (
+                                                        <div key={book.id} onClick={() => { setSelected(book); setView('checkout'); }} className="flex-shrink-0 w-64 md:w-80 group cursor-pointer snap-start touch-active">
+                                                            <div className="aspect-[3/4] rounded-2xl md:rounded-3xl overflow-hidden mb-6 md:mb-8 shadow-xl relative bg-slate-200">
+                                                                <SafeImage src={book.image} alt={book.title} title={book.title} />
+                                                                <div className="absolute inset-0 image-overlay opacity-80 transition-opacity group-hover:opacity-90"></div>
+                                                                <div className="absolute bottom-6 left-6 right-6">
+                                                                    <span className="text-[9px] bg-blue-600 text-white px-3 py-1 rounded-full font-bold uppercase tracking-widest mb-3 inline-block">{book.tag}</span>
+                                                                    <h4 className="font-serif italic text-xl text-white mb-2 leading-tight">{book.title}</h4>
+                                                                    <p className="font-mono text-blue-400 font-bold text-sm">€{book.price.toFixed(2)}</p>
+                                                                </div>
+                                                                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all bg-blue-900/40 backdrop-blur-[2px] hidden md:flex">
+                                                                    <span className="bg-white text-blue-900 px-8 py-3 rounded-xl font-bold uppercase text-[10px] tracking-widest shadow-2xl transform scale-90 group-hover:scale-100 transition-transform">Get Access</span>
+                                                                </div>
                                                             </div>
                                                         </div>
-                                                        <div className="flex justify-between items-center mb-2 px-1">
-                                                            <span className="text-[9px] bg-blue-50 text-blue-600 px-2 py-0.5 rounded font-bold uppercase tracking-widest">{book.tag}</span>
-                                                            <span className="font-mono text-blue-900 font-bold text-sm">€{book.price.toFixed(2)}</span>
-                                                        </div>
-                                                        <h4 className="font-serif italic text-xl px-1 group-hover:text-blue-600 transition-colors">{book.title}</h4>
-                                                    </div>
-                                                ))}
+                                                    ))}
+                                                </div>
                                             </div>
+                                        ))
+                                    ) : (
+                                        <div className="text-center py-20 bg-slate-50 rounded-[3rem] border-2 border-dashed border-slate-200 animate-fade-in">
+                                            <Icon name="search-x" size={48} className="text-slate-300 mx-auto mb-4" />
+                                            <p className="text-slate-500 font-medium">No assets found matching "{searchQuery}"</p>
+                                            <button onClick={() => setSearchQuery('')} className="mt-4 text-blue-600 font-bold text-sm uppercase tracking-widest hover:underline">Clear Search</button>
                                         </div>
-                                    ))}
+                                    )}
                                 </div>
                             </section>
                         </main>
                     )}
 
                     {view === 'checkout' && (
-                        <main className="pt-32 pb-24 max-w-6xl mx-auto px-6 animate-fade-in">
-                            <button onClick={() => setView('home')} className="flex items-center gap-2 text-[10px] font-bold text-slate-400 hover:text-blue-600 mb-12 uppercase tracking-widest transition-colors"><Icon name="arrow-left" size={14}/> Back to Catalog</button>
-                            
-                            <div className="grid lg:grid-cols-12 gap-20">
-                                <div className="lg:col-span-7 space-y-16">
+                        <main className="pt-28 md:pt-32 pb-24 max-w-6xl mx-auto px-4 md:px-6 animate-fade-in">
+                            <button onClick={() => setView('home')} className="flex items-center gap-2 text-[10px] font-bold text-slate-400 hover:text-blue-600 mb-8 md:mb-12 uppercase tracking-widest transition-colors"><Icon name="arrow-left" size={14}/> Return</button>
+                            <div className="grid lg:grid-cols-12 gap-12 lg:gap-20">
+                                <div className="lg:col-span-7 space-y-10 md:space-y-16">
                                     <div className="space-y-4">
-                                        <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-blue-600">Purchase Authorization</span>
-                                        <h2 className="text-6xl font-serif text-slate-900 leading-tight">{selected === 'token' ? t.tokenTitle : selected.title}</h2>
+                                        <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-blue-600">Secure Acquisition</span>
+                                        <h2 className="text-4xl md:text-6xl font-serif text-slate-900 leading-tight">{selected === 'token' ? t.tokenTitle : selected.title}</h2>
                                     </div>
-
-                                    <div className="space-y-12 pt-12 border-t border-slate-100">
-                                        {/* EMAIL FIELD */}
-                                        <div className="space-y-6">
-                                            <div className="flex justify-between">
-                                                <label className="text-[10px] font-bold uppercase text-slate-500 tracking-widest">{t.email}</label>
-                                                <span className="text-[10px] text-slate-300">Used for transaction receipts</span>
-                                            </div>
-                                            <input 
-                                                type="email" 
-                                                value={email} 
-                                                onChange={e => setEmail(e.target.value)} 
-                                                className="w-full bg-transparent border-b-2 border-slate-100 py-6 outline-none focus:border-blue-600 text-3xl font-light transition-colors placeholder:text-slate-200" 
-                                                placeholder="curator@example.com" 
-                                            />
+                                    <div className="space-y-10 md:space-y-12 pt-8 md:pt-12 border-t border-slate-100">
+                                        <div className="space-y-4">
+                                            <label className="text-[10px] font-bold uppercase text-slate-500 tracking-widest">{t.email}</label>
+                                            <input type="email" value={email} onChange={e => setEmail(e.target.value)} className="w-full bg-transparent border-b-2 border-slate-100 py-4 md:py-6 outline-none focus:border-blue-600 text-2xl md:text-3xl font-light placeholder:text-slate-200" placeholder="curator@example.com" />
                                         </div>
-
-                                        {/* TOKEN SPECIFIC FIELDS */}
                                         {selected === 'token' && (
-                                            <div className="grid md:grid-cols-2 gap-12 animate-fade-in">
-                                                <div className="space-y-6">
+                                            <div className="grid md:grid-cols-2 gap-8 md:gap-12">
+                                                <div className="space-y-4">
                                                     <label className="text-[10px] font-bold uppercase text-slate-500 tracking-widest">Quantity</label>
-                                                    <input 
-                                                        type="number" 
-                                                        min="1"
-                                                        step="1"
-                                                        value={qty} 
-                                                        onChange={e => setQty(Math.max(1, parseInt(e.target.value) || 1))} 
-                                                        className="w-full bg-transparent border-b-2 border-slate-100 py-6 outline-none focus:border-blue-600 text-4xl font-mono text-blue-900 transition-colors" 
-                                                    />
+                                                    <input type="number" min="1" value={qty} onChange={e => setQty(Math.max(1, parseInt(e.target.value) || 1))} className="w-full bg-transparent border-b-2 border-slate-100 py-4 outline-none focus:border-blue-600 text-3xl md:text-4xl font-mono text-blue-900" />
                                                 </div>
-                                                <div className="space-y-6">
+                                                <div className="space-y-4">
                                                     <label className="text-[10px] font-bold uppercase text-slate-500 tracking-widest">Network</label>
-                                                    <div className="py-6 border-b-2 border-slate-100 flex items-center justify-between">
-                                                        <span className="text-xl font-mono text-slate-300">Polygon L2</span>
+                                                    <div className="py-4 md:py-6 border-b-2 border-slate-100 flex items-center justify-between">
+                                                        <span className="text-lg font-mono text-slate-300">Polygon L2</span>
                                                         <div className="w-3 h-3 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]"></div>
                                                     </div>
                                                 </div>
                                             </div>
                                         )}
-
-                                        {/* WALLET FIELD */}
                                         <div className="space-y-6">
                                             <label className="text-[10px] font-bold uppercase text-slate-500 tracking-widest">{t.wallet}</label>
                                             {!isConnected ? (
-                                                <div className="flex flex-col md:flex-row gap-6">
-                                                    <button 
-                                                        onClick={() => setIsWalletModalOpen(true)} 
-                                                        className="flex-1 border-2 border-blue-50 bg-white py-6 rounded-2xl flex items-center justify-center gap-4 text-xs font-bold hover:bg-blue-50 hover:border-blue-200 transition-all text-blue-900 shadow-sm"
-                                                    >
-                                                        <Icon name="wallet" size={18} /> {t.connect}
-                                                    </button>
-                                                    <input 
-                                                        type="text" 
-                                                        value={manualWallet}
-                                                        onChange={e => setManualWallet(e.target.value)}
-                                                        className="flex-1 border-2 border-slate-50 rounded-2xl px-8 py-6 outline-none focus:border-blue-600 text-sm font-mono shadow-sm bg-white" 
-                                                        placeholder="Manual destination (0x...)" 
-                                                    />
+                                                <div className="flex flex-col gap-4">
+                                                    <button onClick={() => setIsWalletModalOpen(true)} className="w-full border-2 border-blue-50 bg-white py-5 rounded-2xl flex items-center justify-center gap-4 text-xs font-bold hover:bg-blue-50 transition-all text-blue-900 shadow-sm touch-active"><Icon name="wallet" size={18} /> {t.connect}</button>
+                                                    <input type="text" value={manualWallet} onChange={e => setManualWallet(e.target.value)} className="w-full border-2 border-slate-50 rounded-2xl px-6 py-5 outline-none focus:border-blue-600 text-xs font-mono shadow-sm bg-white" placeholder="Manual address (0x...)" />
                                                 </div>
                                             ) : (
-                                                <div className="p-8 bg-blue-50 rounded-3xl border border-blue-100 flex items-center justify-between shadow-inner animate-fade-in">
+                                                <div className="p-6 md:p-8 bg-blue-50 rounded-3xl border border-blue-100 flex items-center justify-between shadow-inner">
                                                     <div className="flex items-center gap-4">
                                                         <Icon name="shield-check" size={24} className="text-blue-600" />
-                                                        <div>
-                                                            <p className="text-[9px] font-bold text-blue-400 uppercase tracking-widest mb-1">Authenticated via {walletProvider}</p>
-                                                            <p className="font-mono text-xl text-blue-900 tracking-tight">0x71C7656EC7ab88b098defB751B7401B5f6d8976F</p>
+                                                        <div className="overflow-hidden">
+                                                            <p className="text-[9px] font-bold text-blue-400 uppercase mb-1">Signed via {walletProvider}</p>
+                                                            <p className="font-mono text-sm md:text-xl text-blue-900 truncate">0x71C7656EC7ab88b098defB751B7401B5f6d8976F</p>
                                                         </div>
                                                     </div>
-                                                    <button onClick={() => setIsConnected(false)} className="text-[10px] font-bold uppercase text-blue-400 hover:text-red-500 transition-colors">Change Destination</button>
+                                                    <button onClick={() => setIsConnected(false)} className="text-[10px] font-bold uppercase text-blue-400 hover:text-red-500 whitespace-nowrap">Change</button>
                                                 </div>
                                             )}
                                         </div>
                                     </div>
                                 </div>
-
                                 <div className="lg:col-span-5">
-                                    <div className="sticky top-32 bg-white p-12 rounded-[3rem] shadow-[0_32px_80px_rgba(15,23,42,0.1)] border border-blue-50 space-y-10">
-                                        <h3 className="text-3xl font-serif italic border-b border-blue-50 pb-8">Valuation Summary</h3>
-                                        
-                                        <div className="space-y-6">
-                                            <div className="flex justify-between text-sm">
-                                                <span className="text-slate-400">Inventory Value</span>
-                                                <span className="font-mono font-bold">€{total.toFixed(2)}</span>
-                                            </div>
-                                            <div className="flex justify-between text-sm">
-                                                <span className="text-slate-400">Processing & Gas</span>
-                                                <span className="text-green-600 font-bold uppercase text-[10px] tracking-widest">Sponsored</span>
-                                            </div>
-                                            <div className="pt-8 mt-4 border-t border-blue-50 flex justify-between items-end">
-                                                <span className="text-2xl font-serif italic text-slate-900">Final Total</span>
-                                                <span className="text-5xl font-light text-blue-600 tracking-tighter">€{total.toFixed(2)}</span>
-                                            </div>
+                                    <div className="sticky top-28 bg-white p-8 md:p-12 rounded-[2.5rem] md:rounded-[3.5rem] shadow-xl border border-blue-50 space-y-10">
+                                        <h3 className="text-2xl font-serif italic border-b pb-8 text-slate-900">Valuation</h3>
+                                        <div className="space-y-4">
+                                            <div className="flex justify-between text-sm"><span className="text-slate-400">Inventory</span><span className="font-mono font-bold">€{total.toFixed(2)}</span></div>
+                                            <div className="flex justify-between text-sm"><span className="text-slate-400">Gas & Settlement</span><span className="text-green-600 font-bold uppercase text-[10px]">Sponsored</span></div>
+                                            <div className="pt-8 border-t border-blue-50 flex justify-between items-end"><span className="text-xl font-serif italic text-slate-900">Total</span><span className="text-4xl font-light text-blue-600 tracking-tighter">€{total.toFixed(2)}</span></div>
                                         </div>
-
                                         <div className="space-y-8">
                                             <label className="flex gap-4 cursor-pointer group">
-                                                <input 
-                                                    type="checkbox" 
-                                                    checked={accepted} 
-                                                    onChange={e => setAccepted(e.target.checked)} 
-                                                    className="mt-1 w-6 h-6 border-slate-200 rounded-lg text-blue-600 focus:ring-0 transition-all group-hover:border-blue-400" 
-                                                />
-                                                <span className="text-xs text-slate-400 leading-relaxed transition-colors group-hover:text-slate-500">{t.terms}</span>
+                                                <input type="checkbox" checked={accepted} onChange={e => setAccepted(e.target.checked)} className="mt-1 w-6 h-6 border-slate-200 rounded-lg text-blue-600 focus:ring-0" />
+                                                <span className="text-[11px] text-slate-400 leading-relaxed group-hover:text-slate-500 transition-colors">{t.terms}</span>
                                             </label>
-
-                                            <button 
-                                                onClick={handlePurchase} 
-                                                disabled={!accepted || !email || (!isConnected && !manualWallet)} 
-                                                className="w-full bg-[#0F172A] hover:bg-blue-600 text-white py-6 rounded-2xl font-bold uppercase tracking-[0.2em] text-xs disabled:opacity-20 shadow-2xl shadow-blue-900/20 transition-all transform active:scale-95"
-                                            >
-                                                {t.buyNow}
-                                            </button>
-
-                                            <div className="flex justify-center items-center gap-8 opacity-20 grayscale brightness-150">
-                                                <div className="w-12 h-8 bg-slate-300 rounded"></div>
-                                                <div className="w-12 h-8 bg-slate-300 rounded"></div>
-                                                <div className="w-12 h-8 bg-slate-300 rounded"></div>
-                                            </div>
+                                            <button onClick={handlePurchase} disabled={!accepted || !email || (!isConnected && !manualWallet)} className="w-full bg-[#0F172A] hover:bg-blue-600 text-white py-5 rounded-2xl font-bold uppercase tracking-[0.2em] text-[10px] disabled:opacity-20 shadow-2xl transition-all touch-active">{t.buyNow}</button>
                                         </div>
                                     </div>
                                 </div>
@@ -396,144 +478,93 @@
                     )}
 
                     {view === 'status' && (
-                        <main className="pt-48 pb-24 text-center max-w-2xl mx-auto px-6 animate-fade-in">
-                            <div className="flex justify-center mb-16 relative">
-                                <div className={`w-48 h-48 rounded-full flex items-center justify-center transition-all duration-1000 ${step === 3 ? 'bg-green-50 shadow-[0_0_50px_rgba(34,197,94,0.15)]' : 'bg-blue-50'}`}>
-                                    {step === 3 ? (
-                                        <Icon name="check" size={64} className="text-green-600 animate-fade-in" />
-                                    ) : (
-                                        <Icon name="refresh-ccw" size={48} className="text-blue-600 animate-spin" />
-                                    )}
+                        <main className="pt-40 md:pt-48 pb-24 text-center max-w-2xl mx-auto px-4 animate-fade-in">
+                            <div className="flex justify-center mb-12 relative">
+                                <div className={`w-36 h-36 md:w-48 md:h-48 rounded-full flex items-center justify-center transition-all duration-1000 ${step === 3 ? 'bg-green-50' : 'bg-blue-50'}`}>
+                                    {step === 3 ? <Icon name="check" size={56} className="text-green-600" /> : <Icon name="refresh-ccw" size={40} className="text-blue-600 animate-spin" />}
                                 </div>
-                                {step < 3 && (
-                                    <div className="absolute -bottom-10 left-1/2 -translate-x-1/2">
-                                        <span className="text-[10px] font-mono uppercase text-blue-400 animate-pulse-soft tracking-widest">Awaiting Network Confirmation...</span>
-                                    </div>
-                                )}
                             </div>
-                            
-                            <h2 className="text-5xl font-serif italic mb-6 leading-tight">{t.status[step]}</h2>
+                            <h2 className="text-4xl md:text-5xl font-serif italic mb-6 leading-tight">{t.status[step]}</h2>
                             <div className="flex justify-center items-center gap-3 mb-16">
-                                <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">Transaction ID</span>
-                                <span className="font-mono text-xs text-blue-900 bg-blue-50 px-3 py-1 rounded">LXD-POLY-TX-{Math.random().toString(36).substring(2, 10).toUpperCase()}</span>
+                                <span className="text-[9px] font-bold text-slate-300 uppercase">TXID</span>
+                                <span className="font-mono text-[10px] text-blue-900 bg-blue-50 px-3 py-1 rounded truncate">LXD-POLY-{Math.random().toString(36).substring(2, 12).toUpperCase()}</span>
                             </div>
-
-                            <div className="grid grid-cols-4 gap-4 max-w-sm mx-auto mb-16">
-                                {[0, 1, 2, 3].map(i => (
-                                    <div key={i} className={`h-1.5 rounded-full transition-all duration-700 ${i <= step ? 'bg-blue-600 shadow-[0_0_8px_rgba(37,99,235,0.4)]' : 'bg-slate-100'}`}></div>
-                                ))}
+                            <div className="grid grid-cols-4 gap-3 max-w-sm mx-auto mb-16">
+                                {[0, 1, 2, 3].map(i => <div key={i} className={`h-1.5 rounded-full transition-all duration-700 ${i <= step ? 'bg-blue-600 shadow-lg' : 'bg-slate-100'}`}></div>)}
                             </div>
-
                             {step === 3 && (
-                                <div className="space-y-6 animate-fade-in">
-                                    <div className="bg-white border border-slate-100 p-8 rounded-3xl shadow-lg max-w-sm mx-auto text-left space-y-3">
-                                        <p className="text-[10px] font-bold text-blue-400 uppercase tracking-widest mb-2">Fulfilment Log</p>
-                                        <p className="text-xs font-mono text-slate-500">✓ Signature Verified</p>
-                                        <p className="text-xs font-mono text-slate-500">✓ On-Chain Transfer Dispatched</p>
-                                        <p className="text-xs font-mono text-slate-500">✓ Digital Receipt Sent</p>
-                                    </div>
-                                    <button 
-                                        onClick={() => window.location.reload()} 
-                                        className="bg-[#0F172A] hover:bg-blue-600 text-white px-14 py-6 rounded-2xl font-bold uppercase text-[10px] tracking-[0.3em] transition-all shadow-xl shadow-blue-900/10 active:scale-95"
-                                    >
-                                        Return to Ecosystem
-                                    </button>
-                                </div>
+                                <button onClick={() => window.location.reload()} className="bg-[#0F172A] hover:bg-blue-600 text-white px-10 py-5 rounded-2xl font-bold uppercase text-[10px] tracking-[0.3em] transition-all touch-active">Back to Collection</button>
                             )}
                         </main>
                     )}
 
-                    {/* WALLET MODAL */}
                     {isWalletModalOpen && (
-                        <div className="fixed inset-0 z-[100] bg-[#0F172A]/80 backdrop-blur-xl flex items-center justify-center p-6 animate-fade-in">
-                            <div className="bg-white w-full max-w-lg rounded-[3.5rem] p-16 space-y-12 shadow-2xl relative overflow-hidden border border-blue-50">
-                                <button onClick={() => setIsWalletModalOpen(false)} className="absolute top-10 right-10 text-slate-300 hover:text-black transition-colors">
-                                    <Icon name="x" size={32} />
-                                </button>
-                                
+                        <div className="fixed inset-0 z-[100] bg-[#0F172A]/90 backdrop-blur-xl flex items-end sm:items-center justify-center p-0 sm:p-6 animate-fade-in">
+                            <div className="bg-white w-full max-w-lg rounded-t-[2.5rem] sm:rounded-[3.5rem] p-8 md:p-16 space-y-12 shadow-2xl relative overflow-hidden border border-blue-50">
+                                <button onClick={() => setIsWalletModalOpen(false)} className="absolute top-8 right-8 text-slate-300 hover:text-black transition-colors"><Icon name="x" size={24} /></button>
                                 <div className="space-y-4">
-                                    <h3 className="text-4xl font-serif italic text-slate-900">{t.walletProvider}</h3>
-                                    <p className="text-slate-500 font-light text-sm">Secure bridge to decentralized identity.</p>
+                                    <h3 className="text-3xl md:text-4xl font-serif italic">{t.walletProvider}</h3>
+                                    <p className="text-slate-500 font-light text-sm">Establish a secure bridge to your identity.</p>
                                 </div>
-
                                 <div className="space-y-4">
                                     {['MetaMask', 'WalletConnect', 'Coinbase'].map(name => (
-                                        <button 
-                                            key={name}
-                                            disabled={isConnecting}
-                                            onClick={() => handleConnect(name)}
-                                            className="w-full flex items-center justify-between p-8 border-2 border-slate-50 rounded-[2rem] hover:bg-blue-50 hover:border-blue-200 transition-all text-left group disabled:opacity-50"
-                                        >
+                                        <button key={name} disabled={isConnecting} onClick={() => handleConnect(name)} className="w-full flex items-center justify-between p-6 md:p-8 border-2 border-slate-50 rounded-[1.5rem] md:rounded-[2rem] hover:bg-blue-50 transition-all text-left disabled:opacity-50 touch-active">
                                             <div className="flex items-center gap-4">
-                                                <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center group-hover:bg-white transition-colors">
-                                                    <Icon name="link" size={20} className="text-slate-400 group-hover:text-blue-600" />
-                                                </div>
-                                                <span className="font-bold text-xs uppercase tracking-widest text-slate-700">{name}</span>
+                                                <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center"><Icon name="link" size={18} className="text-slate-400" /></div>
+                                                <span className="font-bold text-[10px] md:text-xs uppercase tracking-widest text-slate-700">{name}</span>
                                             </div>
-                                            <Icon name="chevron-right" size={18} className="text-slate-200 group-hover:text-blue-600 group-hover:translate-x-1 transition-all" />
+                                            <Icon name="chevron-right" size={18} className="text-slate-200" />
                                         </button>
                                     ))}
                                 </div>
-
                                 {isConnecting && (
                                     <div className="absolute inset-0 bg-white/95 backdrop-blur-sm flex flex-col items-center justify-center gap-6 animate-fade-in">
-                                        <Icon name="refresh-ccw" size={48} className="text-blue-600 animate-spin" />
-                                        <p className="text-xs font-bold uppercase tracking-[0.4em] text-blue-900">{t.waitingSign}</p>
+                                        <Icon name="refresh-ccw" size={40} className="text-blue-600 animate-spin" />
+                                        <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-blue-900">{t.waitingSign}</p>
                                     </div>
                                 )}
-                                
-                                <div className="text-center pt-4">
-                                    <p className="text-[10px] font-bold uppercase tracking-widest text-slate-300">Audited Security Protocol</p>
-                                </div>
                             </div>
                         </div>
                     )}
 
-                    {/* FOOTER */}
-                    <footer className="bg-[#0F172A] text-white py-32 px-6 mt-20 relative overflow-hidden">
+                    <footer className="bg-[#0F172A] text-white py-16 md:py-32 px-4 md:px-6 mt-20 relative overflow-hidden">
                         <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-blue-500/20 to-transparent"></div>
-                        <div className="max-w-7xl mx-auto grid md:grid-cols-4 gap-20 relative z-10">
-                            <div className="md:col-span-2 space-y-10">
-                                <div className="flex items-center gap-3">
+                        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-16 md:gap-20 relative z-10 text-center md:text-left">
+                            <div className="md:col-span-2 space-y-8">
+                                <div className="flex items-center justify-center md:justify-start gap-3">
                                     <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center shadow-[0_0_15px_rgba(37,99,235,0.4)]"><Icon name="layers" size={16}/></div>
                                     <span className="font-serif italic text-2xl">LuxeDigital</span>
                                 </div>
-                                <p className="text-blue-200/30 text-base font-light max-w-md leading-relaxed">Deterministic digital asset issuance on the Polygon Network. Engineered for institutional compliance and high-frequency delivery.</p>
+                                <p className="text-blue-200/30 text-sm font-light max-w-md mx-auto md:mx-0 leading-relaxed">Institutional digital asset issuance on the Polygon Network. Compliant, safe, and immutable delivery guaranteed.</p>
                                 <div className="space-y-1 pt-4">
                                     <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-blue-500/80">Developed by Amit N</p>
-                                    <p className="text-[9px] font-mono text-blue-900 uppercase">Version 4.2.0-STABLE</p>
+                                    <p className="text-[9px] font-mono text-blue-900 uppercase">Version 4.3.5-STABLE</p>
                                 </div>
                             </div>
-                            <div className="space-y-8">
+                            <div className="space-y-6 text-slate-400">
                                 <h4 className="text-[11px] font-bold uppercase tracking-[0.4em] text-blue-400">Governance</h4>
-                                <ul className="space-y-4 text-[11px] font-bold uppercase tracking-widest text-blue-100/30">
-                                    <li className="hover:text-blue-400 cursor-pointer transition-colors">Digital Issuance Terms</li>
-                                    <li className="hover:text-blue-400 cursor-pointer transition-colors">Sovereignty Audit</li>
-                                    <li className="hover:text-blue-400 cursor-pointer transition-colors">Whitepaper v4</li>
+                                <ul className="space-y-3 text-[10px] font-bold uppercase tracking-widest text-blue-100/30">
+                                    <li className="hover:text-blue-400 cursor-pointer">Issuance Terms</li>
+                                    <li className="hover:text-blue-400 cursor-pointer">Sovereignty</li>
+                                    <li className="hover:text-blue-400 cursor-pointer text-blue-600">Whitepaper</li>
                                 </ul>
                             </div>
-                            <div className="space-y-8">
-                                <h4 className="text-[11px] font-bold uppercase tracking-[0.4em] text-blue-400">Infrastructure</h4>
-                                <div className="flex items-center gap-3 text-green-400 bg-green-400/5 px-4 py-2 rounded-lg border border-green-400/10 w-fit">
+                            <div className="space-y-6">
+                                <h4 className="text-[11px] font-bold uppercase tracking-[0.4em] text-blue-400">Network</h4>
+                                <div className="flex items-center justify-center md:justify-start gap-3 text-green-400 bg-green-400/5 px-4 py-2 rounded-lg border border-green-400/10 w-fit mx-auto md:mx-0">
                                     <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse shadow-[0_0_10px_rgba(34,197,94,0.6)]"></div> 
-                                    <span className="text-[10px] uppercase font-bold tracking-widest">Mainnet Live</span>
+                                    <span className="text-[10px] uppercase font-bold tracking-widest">Online</span>
                                 </div>
-                                <p className="text-[9px] font-mono text-blue-900 uppercase leading-loose">
-                                    Polygon Latency: 2.1s<br/>
-                                    Conf Rate: 100%<br/>
-                                    Security Layer: v2
-                                </p>
                             </div>
                         </div>
-                        <div className="max-w-7xl mx-auto pt-24 border-t border-white/5 mt-10 flex flex-col md:flex-row justify-between items-center gap-6 text-[11px] font-bold uppercase tracking-[0.6em] text-blue-100/10">
+                        <div className="max-w-7xl mx-auto pt-16 md:pt-24 border-t border-white/5 mt-10 flex flex-col md:flex-row justify-between items-center gap-6 text-[10px] md:text-[11px] font-bold uppercase tracking-[0.6em] text-blue-100/10">
                             <span>&copy; 2026 LuxeDigital Protocol</span>
-                            <div className="flex gap-8">
+                            <div className="flex gap-4 md:gap-8">
                                 <span>Paris</span>
                                 <span>London</span>
                                 <span>Frankfurt</span>
                             </div>
                         </div>
-                        <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-blue-600/5 rounded-full blur-[120px]"></div>
                     </footer>
                 </div>
             );
