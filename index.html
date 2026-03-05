@@ -23,6 +23,33 @@
         .touch-active:active { transform: scale(0.96); transition: 0.1s; }
         .image-overlay { background: linear-gradient(to top, rgba(15, 23, 42, 0.95) 0%, rgba(15, 23, 42, 0.3) 50%, transparent 100%); }
         .receipt-border { border: 2px dashed #CBD5E1; }
+        
+        /* Institutional Tooltip */
+        .lxd-tooltip { position: relative; display: inline-flex; align-items: center; }
+        .lxd-tooltip .tooltiptext {
+            visibility: hidden;
+            width: 130px;
+            background-color: #0F172A;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 6px 0;
+            position: absolute;
+            z-index: 100;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.2s;
+            font-size: 8px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            pointer-events: none;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+        }
+        .lxd-tooltip:hover .tooltiptext { visibility: visible; opacity: 1; }
+
         @media print { .no-print { display: none !important; } body { background: white; } }
     </style>
 </head>
@@ -51,38 +78,55 @@
             );
         };
 
-        // --- CONSTANTS ---
+        // --- CORE DATA ---
         const TOKEN_UNIT_PRICE = 12.50;
         const REWARD_AMOUNT = 1.00;
 
         const CATEGORIES = [
             {
                 id: 'cat-1',
-                name: 'Global Bestsellers',
+                name: 'Core Curriculum',
                 books: [
-                    { id: 'eb-01', title: 'The Bitcoin Standard', price: 29.00, tag: 'Bestseller', image: 'https://images.unsplash.com/photo-1518546305927-5a555bb7020d?q=80&w=800&auto=format&fit=crop' },
+                    { id: 'eb-01', title: 'The Polygon Horizon', price: 29.00, tag: 'Bestseller', image: 'https://images.unsplash.com/photo-1639322537228-f710d846310a?auto=format&fit=crop&q=80&w=800&h=1000' },
                     { id: 'eb-02', title: 'Mastering Bitcoin', price: 39.00, tag: 'Technical', image: 'https://images.unsplash.com/photo-1621416848446-9f6efdec403d?q=80&w=800&auto=format&fit=crop' },
                     { id: 'eb-03', title: 'Blockchain Revolution', price: 35.00, tag: 'Essential', image: 'https://images.unsplash.com/photo-1639762681485-074b7f938ba0?q=80&w=800&auto=format&fit=crop' }
                 ]
             },
             {
                 id: 'cat-2',
-                name: 'Strategic Assets',
+                name: 'Strategic Insights',
                 books: [
-                    { id: 'eb-04', title: 'Digital Gold', price: 45.00, tag: 'Recommended', image: 'https://images.unsplash.com/photo-1620321023374-d1a68fbc720d?q=80&w=800&auto=format&fit=crop' },
-                    { id: 'eb-05', title: 'The Infinite Machine', price: 55.00, tag: 'New Release', image: 'https://images.unsplash.com/photo-1640341719942-0268302abc0a?q=80&w=800&auto=format&fit=crop' },
-                    { id: 'eb-06', title: 'Layer 2 Economics', price: 32.00, tag: 'Technical', image: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=800&auto=format&fit=crop' }
+                    { id: 'eb-04', title: 'Yield Dynamics', price: 45.00, tag: 'Recommended', image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=800&h=1000' },
+                    { id: 'eb-05', title: 'Digital Sovereignty', price: 55.00, tag: 'New Release', image: 'https://images.unsplash.com/photo-1642104704074-907c0698cbd9?auto=format&fit=crop&q=80&w=800&h=1000' },
+                    { id: 'eb-06', title: 'Technical Architecture', price: 32.00, tag: 'Advanced', image: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=800&h=1000' }
                 ]
             }
         ];
 
         const TRANSLATIONS = {
-            EN: { hero: "Institutional Assets.", subHero: "Secure acquisition of Genesis ERC20 tokens and curated digital literature. Built on Polygon.", tokenTitle: "Genesis Utility Token", buyNow: "Authorize & Buy", email: "Delivery Email", wallet: "Destination Wallet", history: "Vault", back: "Back", readBtn: "Read & Earn", acquireBtn: "Acquire Now", claimReward: "Claim Reward", rewardPending: "Allocating Reward...", rewardSuccess: "Credited to Vault", search: "Search library..." },
-            FR: { hero: "Actifs Institutionnels.", subHero: "Acquisition sécurisée de jetons Genesis ERC20 et littérature numérique. Conçu sur Polygon.", tokenTitle: "Jeton Genesis", buyNow: "Autoriser & Acheter", email: "Email de Livraison", wallet: "Portefeuille", history: "Coffre", back: "Retour", readBtn: "Lire & Gagner", acquireBtn: "Acquérir", claimReward: "Réclamer", rewardPending: "Allocation...", rewardSuccess: "Créditée", search: "Rechercher..." },
-            PT: { hero: "Ativos Institucionais.", subHero: "Aquisição segura de tokens Genesis ERC20 e literatura digital. Construído na Polygon.", tokenTitle: "Token Genesis", buyNow: "Autorizar & Comprar", email: "E-mail de Entrega", wallet: "Carteira", history: "Cofre", back: "Voltar", readBtn: "Ler & Ganhar", acquireBtn: "Adquirir", claimReward: "Resgatar", rewardPending: "Alocando...", rewardSuccess: "Creditada", search: "Pesquisar..." },
-            ES: { hero: "Activos Institucionales.", subHero: "Adquisición segura de tokens Genesis ERC20 y literatura digital. Construido en Polygon.", tokenTitle: "Token Genesis", buyNow: "Autorizar & Comprar", email: "Email", wallet: "Billetera", history: "Bóveda", back: "Atrás", readBtn: "Leer & Ganar", acquireBtn: "Adquirir", claimReward: "Reclamar", rewardPending: "Asignando...", rewardSuccess: "Acreditado", search: "Buscar..." },
-            DE: { hero: "Institutionelle Assets.", subHero: "Sicherer Erwerb von Genesis ERC20-Token und digitaler Literatur. Auf Polygon.", tokenTitle: "Genesis Token", buyNow: "Bestätigen", email: "E-Mail", wallet: "Wallet", history: "Tresor", back: "Zurück", readBtn: "Lesen & Verdienen", acquireBtn: "Erwerben", claimReward: "Einfordern", rewardPending: "Zuweisung...", rewardSuccess: "Gutgeschrieben", search: "Suche..." },
-            IT: { hero: "Asset Istituzionali.", subHero: "Acquisizione sicura di token Genesis ERC20 e letteratura digitale. Su Polygon.", tokenTitle: "Token Genesis", buyNow: "Autorizza", email: "Email", wallet: "Wallet", history: "Caveau", back: "Indietro", readBtn: "Leggi & Guadagna", acquireBtn: "Acquista", claimReward: "Riscatta", rewardPending: "Assegnazione...", rewardSuccess: "Accreditato", search: "Cerca..." }
+            EN: { 
+                hero: "Institutional Assets.", 
+                subHero: "Secure acquisition of Genesis ERC20 tokens and curated digital literature. Built on Polygon.", 
+                tokenTitle: "Genesis Utility Token", 
+                buyNow: "Authorize & Buy", 
+                email: "Delivery Email", 
+                wallet: "Wallet Destination", 
+                history: "Vault", 
+                back: "Back", 
+                readBtn: "Read & Earn", 
+                acquireBtn: "Acquire Now", 
+                claimReward: "Claim 1.00 GEN", 
+                rewardPending: "Allocating Reward...", 
+                rewardSuccess: "Credited to Vault", 
+                search: "Search library...",
+                terms: "I acknowledge that transfers on the Polygon Network are irreversible and non-refundable upon delivery. I am responsible for wallet accuracy.",
+                status: ["Web3 Handshake...", "Verifying Payment", "Broadcasting to Polygon", "Asset Dispatched"]
+            },
+            FR: { hero: "Actifs Institutionnels.", subHero: "Acquisition sécurisée de jetons Genesis ERC20 et littérature numérique. Conçu sur Polygon.", tokenTitle: "Jeton Genesis", buyNow: "Autoriser & Acheter", email: "Email de Livraison", wallet: "Portefeuille", history: "Coffre", back: "Retour", readBtn: "Lire & Gagner", acquireBtn: "Acquérir", claimReward: "Réclamer", rewardPending: "Allocation...", rewardSuccess: "Créditée", search: "Rechercher...", terms: "Je reconnais que les transferts sur le réseau Polygon sont irréversibles.", status: ["Signature Web3...", "Vérification", "Diffusion", "Envoyé"] },
+            PT: { hero: "Ativos Institucionais.", subHero: "Aquisição segura de tokens Genesis ERC20 e literatura digital. Construído na Polygon.", tokenTitle: "Token Genesis", buyNow: "Autorizar & Comprar", email: "E-mail de Entrega", wallet: "Carteira", history: "Cofre", back: "Voltar", readBtn: "Ler & Ganhar", acquireBtn: "Adquirir", claimReward: "Resgatar", rewardPending: "Alocando...", rewardSuccess: "Creditada", search: "Pesquisar...", terms: "Reconheço que as transferências na Rede Polygon são irreversíveis.", status: ["Assinatura Web3...", "Verificando", "Transmitindo", "Concluído"] },
+            ES: { hero: "Activos Institucionales.", subHero: "Adquisición segura de tokens Genesis ERC20 y literatura digital. Construido en Polygon.", tokenTitle: "Token Genesis", buyNow: "Autorizar & Comprar", email: "Email", wallet: "Billetera", history: "Bóveda", back: "Atrás", readBtn: "Leer & Ganar", acquireBtn: "Adquirir", claimReward: "Reclamar", rewardPending: "Asignando...", rewardSuccess: "Acreditado", search: "Buscar...", terms: "Reconozco que las transferencias en la Red Polygon son irreversibles.", status: ["Firma Web3...", "Verificando", "Transmitiendo", "Enviado"] },
+            DE: { hero: "Institutionelle Assets.", subHero: "Sicherer Erwerb von Genesis ERC20-Token und digitaler Literatur. Auf Polygon.", tokenTitle: "Genesis Token", buyNow: "Bestätigen", email: "E-Mail", wallet: "Wallet", history: "Tresor", back: "Zurück", readBtn: "Lesen & Verdienen", acquireBtn: "Erwerben", claimReward: "Einfordern", rewardPending: "Zuweisung...", rewardSuccess: "Gutgeschrieben", search: "Suche...", terms: "Ich bestätige, dass Übertragungen im Polygon-Netzwerk unwiderruflich sind.", status: ["Web3 Handshake...", "Prüfung", "Polygon Transfer", "Asset versendet"] },
+            IT: { hero: "Asset Istituzionali.", subHero: "Acquisizione sicura di token Genesis ERC20 e letteratura digitale. Su Polygon.", tokenTitle: "Token Genesis", buyNow: "Autorizza", email: "Email", wallet: "Wallet", history: "Caveau", back: "Indietro", readBtn: "Leggi & Guadagna", acquireBtn: "Acquista", claimReward: "Riscatta", rewardPending: "Assegnazione...", rewardSuccess: "Accreditato", search: "Cerca...", terms: "Riconosco che i trasferimenti sulla rete Polygon sono irreversibili.", status: ["Firma Web3...", "Verifica", "Trasmissione", "Inviato"] }
         };
 
         function App() {
@@ -91,16 +135,16 @@
             const [selected, setSelected] = useState(null);
             const [step, setStep] = useState(0);
             const [searchQuery, setSearchQuery] = useState('');
-            const [paymentType, setPaymentType] = useState('stripe'); // stripe, paypal, bank
+            const [paymentType, setPaymentType] = useState('stripe');
             
             const [purchaseHistory, setPurchaseHistory] = useState(() => {
-                const saved = localStorage.getItem('lxd_history_v6');
+                const saved = localStorage.getItem('lxd_history_v9');
                 return saved ? JSON.parse(saved) : [];
             });
 
-            useEffect(() => { localStorage.setItem('lxd_history_v6', JSON.stringify(purchaseHistory)); }, [purchaseHistory]);
+            useEffect(() => { localStorage.setItem('lxd_history_v9', JSON.stringify(purchaseHistory)); }, [purchaseHistory]);
 
-            const earnedBalance = useMemo(() => purchaseHistory.reduce((acc, curr) => curr.isReward ? acc + curr.qty : acc, 0), [purchaseHistory]);
+            const earnedBalance = useMemo(() => purchaseHistory.reduce((acc, curr) => curr.isReward ? acc + (curr.qty || 0) : acc, 0), [purchaseHistory]);
 
             const [discoveryBook, setDiscoveryBook] = useState(null);
             const [discoveryPage, setDiscoveryPage] = useState(1);
@@ -120,7 +164,7 @@
 
             useEffect(() => { lucide.createIcons(); }, [view, step, isWalletModalOpen, isConnecting, searchQuery, historyItemDetail, paymentType, discoveryBook, discoveryPage, rewardState, lang]);
 
-            const t = TRANSLATIONS[lang];
+            const t = TRANSLATIONS[lang] || TRANSLATIONS.EN;
             const total = selected === 'token' ? (qty * TOKEN_UNIT_PRICE) : (selected?.price || 0);
 
             const filteredCategories = useMemo(() => {
@@ -147,7 +191,16 @@
                     setStep(s => {
                         if (s >= 3) { 
                             clearInterval(interval); 
-                            setPurchaseHistory(prev => [{ id: txId, date: new Date().toLocaleString(), item: selected === 'token' ? 'Genesis Utility Token' : selected.title, type: selected === 'token' ? 'ERC20' : 'Ebook', qty: selected === 'token' ? qty : 1, amount: total, email: email, wallet: isConnected ? '0x71...976F' : manualWallet }, ...prev]);
+                            setPurchaseHistory(prev => [{ 
+                                id: txId, 
+                                date: new Date().toLocaleString(), 
+                                item: selected === 'token' ? 'Genesis Utility Token' : (selected?.title || 'Unknown'), 
+                                type: selected === 'token' ? 'ERC20' : 'Ebook', 
+                                qty: selected === 'token' ? qty : 1, 
+                                amount: total, 
+                                email: email, 
+                                wallet: isConnected ? '0x71...976F' : (manualWallet || 'N/A') 
+                            }, ...prev]);
                             return 3; 
                         }
                         return s + 1;
@@ -160,29 +213,29 @@
                 setTimeout(() => setRewardState(2), 2000);
                 setTimeout(() => {
                     const tx = `LXD-EARN-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
-                    setPurchaseHistory(prev => [{ id: tx, date: new Date().toLocaleString(), item: `Reward: ${discoveryBook.title}`, type: 'ERC20', qty: REWARD_AMOUNT, amount: 0, isReward: true, email: email || 'learner@protocol.io' }, ...prev]);
+                    setPurchaseHistory(prev => [{ id: tx, date: new Date().toLocaleString(), item: `Reward: ${discoveryBook?.title || 'Study'}`, type: 'ERC20', qty: REWARD_AMOUNT, amount: 0, isReward: true, email: email || 'learner@protocol.io' }, ...prev]);
                     setRewardState(3);
                 }, 3500);
             };
 
             const DigitalReceipt = ({ data, onBack }) => (
-                <div className="space-y-8 animate-fade-in max-w-xl mx-auto py-6">
-                    <div className="bg-white p-6 md:p-10 rounded-[2rem] shadow-2xl border-t-8 border-blue-600 relative overflow-hidden text-left">
+                <div className="space-y-8 animate-fade-in max-w-xl mx-auto py-6 text-left">
+                    <div className="bg-white p-6 md:p-10 rounded-[2rem] shadow-2xl border-t-8 border-blue-600 relative overflow-hidden">
                         <header className="flex justify-between items-center mb-8 border-b pb-6">
-                            <div><h3 className="text-2xl font-serif italic text-blue-900 leading-none mb-1">Receipt</h3><p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Digital Certificate</p></div>
-                            <div className="text-right shrink-0"><p className="text-[9px] font-bold text-slate-500 uppercase">Ref</p><p className="font-mono text-[10px] text-blue-600">{data.id}</p></div>
+                            <div><h3 className="text-2xl font-serif italic text-blue-900 leading-none mb-1">Receipt</h3><p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Verification ID</p></div>
+                            <div className="text-right shrink-0"><p className="text-[9px] font-bold text-slate-500 uppercase">Order Ref</p><p className="font-mono text-[10px] text-blue-600">{data.id}</p></div>
                         </header>
                         <div className="space-y-4 mb-8 text-sm">
-                            <div className="flex justify-between border-b border-slate-50 pb-2"><span>Entity</span><span className="font-medium">{data.email || 'Verified Institutional'}</span></div>
+                            <div className="flex justify-between border-b border-slate-50 pb-2"><span>Recipient</span><span className="font-medium truncate ml-4 italic">{data.email || 'Verified Institutional'}</span></div>
                             <div className="flex justify-between border-b border-slate-50 pb-2"><span>Date</span><span className="font-medium">{data.date}</span></div>
                         </div>
                         <div className="receipt-border p-4 rounded-xl space-y-3 mb-6 bg-slate-50/50">
-                            <div className="flex justify-between text-xs"><span className="text-slate-500">{data.item}</span><span className="font-mono font-bold">€{data.amount.toFixed(2)}</span></div>
-                            <div className="pt-3 border-t border-slate-200 flex justify-between items-baseline"><span className="text-sm font-serif italic">Total</span><span className="text-3xl font-light text-blue-600">€{data.amount.toFixed(2)}</span></div>
+                            <div className="flex justify-between text-xs"><span className="text-slate-500">{data.item}</span><span className="font-mono font-bold">€{(data.amount || 0).toFixed(2)}</span></div>
+                            <div className="pt-3 border-t border-slate-200 flex justify-between items-baseline"><span className="text-sm font-serif italic">Settlement</span><span className="text-3xl font-light text-blue-600">€{(data.amount || 0).toFixed(2)}</span></div>
                         </div>
-                        <footer className="text-center opacity-20 text-[8px] font-mono uppercase tracking-[0.4em]">LuxeDigital Institutional Ledger - 2026</footer>
+                        <footer className="text-center opacity-20 text-[8px] font-mono uppercase tracking-[0.4em]">LuxeDigital Institutional Ledger — Amit N — 2026</footer>
                     </div>
-                    <button onClick={onBack} className="bg-[#0F172A] text-white w-full py-4 rounded-xl font-bold uppercase text-[10px] tracking-[0.2em] no-print touch-active shadow-xl">Return to Ecosystem</button>
+                    <button onClick={onBack} className="bg-[#0F172A] text-white w-full py-4 rounded-xl font-bold uppercase text-[10px] tracking-[0.2em] shadow-xl hover:scale-[1.01] transition-transform">Back to Ecosystem</button>
                 </div>
             );
 
@@ -191,17 +244,26 @@
                     {/* NAV */}
                     <nav className="fixed top-0 w-full z-50 bg-[#0F172A] text-white px-4 py-3 md:py-4 shadow-2xl border-b border-blue-900/30 no-print">
                         <div className="max-w-7xl mx-auto flex justify-between items-center">
-                            <div className="flex items-center gap-2 cursor-pointer group" onClick={() => { setView('home'); setDiscoveryBook(null); }}>
-                                <div className="w-8 h-8 md:w-10 md:h-10 bg-blue-600 flex items-center justify-center rounded-lg shadow-lg"><Icon name="layers" size={18} /></div>
+                            <div className="flex items-center gap-2 cursor-pointer group" onClick={() => { setView('home'); setDiscoveryBook(null); setHistoryItemDetail(null); }}>
+                                <div className="w-8 h-8 md:w-10 md:h-10 bg-blue-600 flex items-center justify-center rounded-lg shadow-lg group-hover:rotate-12 transition-transform"><Icon name="layers" size={18} /></div>
                                 <span className="font-serif italic text-lg md:text-2xl tracking-tighter">LuxeDigital</span>
                             </div>
                             
-                            <div className="flex items-center gap-3 md:gap-6">
-                                <select value={lang} onChange={e => setLang(e.target.value)} className="bg-blue-900/40 text-[9px] font-bold border border-blue-800 rounded-full px-2 py-1 outline-none">
-                                    {Object.keys(TRANSLATIONS).map(l => <option key={l} value={l} className="text-black">{l}</option>)}
-                                </select>
-                                <button onClick={() => { setView('history'); setDiscoveryBook(null); }} className="text-[9px] font-bold uppercase text-blue-300/60 flex items-center gap-1.5"><Icon name="box" size={14} /><span className="hidden sm:inline">{t.history}</span></button>
-                                <button onClick={() => isConnected ? setIsConnected(false) : setIsWalletModalOpen(true)} className="bg-blue-600 px-3 py-2 md:px-5 rounded-lg text-[9px] font-bold uppercase tracking-widest shadow-lg flex items-center gap-1.5"><Icon name="wallet" size={14} /><span className="hidden sm:inline">{isConnected ? "Linked" : t.connect}</span><span className="sm:hidden">{isConnected ? "0x7..." : "Link"}</span></button>
+                            <div className="flex items-center gap-2.5 md:gap-6">
+                                <div className="flex items-center gap-1.5 border border-blue-800 rounded-full px-2 py-1 bg-blue-900/40">
+                                    <Icon name="globe" size={12} className="text-blue-400" />
+                                    <select value={lang} onChange={e => setLang(e.target.value)} className="bg-transparent text-[10px] font-bold outline-none cursor-pointer border-none p-0">
+                                        {Object.keys(TRANSLATIONS).map(l => <option key={l} value={l} className="text-black">{l}</option>)}
+                                    </select>
+                                </div>
+                                <button onClick={() => { setView('history'); setDiscoveryBook(null); setHistoryItemDetail(null); }} className="text-[10px] font-bold uppercase text-blue-300/60 flex items-center gap-1.5 active:text-white transition-colors">
+                                    <Icon name="box" size={14} />
+                                    <span className="hidden sm:inline">{t.history}</span>
+                                </button>
+                                <button onClick={() => isConnected ? setIsConnected(false) : setIsWalletModalOpen(true)} className="bg-blue-600 px-3 py-2 md:px-5 rounded-lg text-[9px] font-bold uppercase tracking-widest shadow-lg flex items-center gap-2 transition-all active:scale-95">
+                                    <Icon name="wallet" size={14} />
+                                    <span className="font-bold">{isConnected ? "Linked Wallet" : "Link Wallet"}</span>
+                                </button>
                             </div>
                         </div>
                     </nav>
@@ -212,20 +274,20 @@
                             <section className="max-w-7xl mx-auto px-4 md:px-6 py-8 md:py-20 grid lg:grid-cols-2 gap-12 md:gap-20 items-center">
                                 <div className="space-y-6 md:space-y-10 text-center lg:text-left">
                                     <div className="inline-flex items-center gap-2 bg-blue-600/10 border border-blue-600/20 px-4 py-1.5 rounded-full">
-                                        <Icon name="zap" size={12} className="text-blue-600" />
-                                        <span className="text-[10px] font-bold text-blue-600 uppercase tracking-widest">v4.9 Institutional Portal — Amit N</span>
+                                        <Icon name="award" size={12} className="text-blue-600" />
+                                        <span className="text-[10px] font-bold text-blue-600 uppercase tracking-widest">Multi-Language Discovery — Amit N — 2026</span>
                                     </div>
                                     <h1 className="text-4xl md:text-7xl lg:text-8xl font-serif text-slate-900 tracking-tight leading-tight md:leading-[0.95]">{t.hero}</h1>
                                     <p className="text-base md:text-xl text-slate-500 font-light leading-relaxed max-w-lg mx-auto lg:mx-0">{t.subHero}</p>
                                     <button onClick={() => { setSelected('token'); setView('checkout'); }} className="bg-blue-600 hover:bg-blue-700 text-white px-8 md:px-10 py-4 md:py-5 rounded-xl font-bold uppercase tracking-widest text-[10px] md:text-xs flex items-center justify-center gap-3 shadow-2xl transition-all hover:-translate-y-1 mx-auto lg:mx-0 touch-active">{t.acquireBtn} Token <Icon name="arrow-right" size={16}/></button>
                                 </div>
                                 <div className="relative group">
-                                    <div className="bg-[#0F172A] p-8 md:p-12 rounded-[2.5rem] md:rounded-[3rem] text-white shadow-2xl relative overflow-hidden">
-                                        <div className="flex justify-between items-start mb-8 md:mb-12"><div className="w-12 h-12 md:w-16 md:h-16 bg-blue-600/20 border border-blue-500/30 rounded-2xl flex items-center justify-center"><Icon name="cpu" size={28} className="text-blue-500" /></div><span className="text-[10px] font-bold uppercase tracking-widest text-blue-400">Fixed Rate</span></div>
+                                    <div className="bg-[#0F172A] p-8 md:p-12 rounded-[2.5rem] md:rounded-[3rem] text-white shadow-2xl relative overflow-hidden border border-white/5 text-left">
+                                        <div className="flex justify-between items-start mb-8 md:mb-12"><div className="w-12 h-12 md:w-16 md:h-16 bg-blue-600/20 border border-blue-500/30 rounded-2xl flex items-center justify-center"><Icon name="cpu" size={28} className="text-blue-500" /></div><span className="text-[10px] font-bold uppercase tracking-widest text-blue-400">Deterministic Pool</span></div>
                                         <h3 className="text-3xl md:text-4xl font-serif mb-4 md:mb-6">{t.tokenTitle}</h3>
                                         <div className="space-y-4 text-blue-300 font-light text-sm">
                                             <p className="flex items-center gap-3"><Icon name="shield-check" size={18} className="text-blue-500"/> Verified ERC20 Protocol</p>
-                                            <p className="flex items-center gap-3"><Icon name="sparkles" size={18} className="text-blue-500"/> Discovery Incentives Enabled</p>
+                                            <p className="flex items-center gap-3"><Icon name="sparkles" size={18} className="text-blue-500"/> Study Incentive Rebates</p>
                                         </div>
                                         <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600/5 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2"></div>
                                     </div>
@@ -236,19 +298,22 @@
                             <section className="bg-white py-16 md:py-24 border-y border-slate-100">
                                 <div className="max-w-7xl mx-auto px-4 md:px-6">
                                     <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 md:mb-16 gap-6">
-                                        <div className="space-y-4"><h3 className="text-[11px] font-bold uppercase tracking-[0.4em] text-blue-600">The Catalog</h3><h2 className="text-3xl md:text-4xl font-serif text-slate-900 leading-tight">Elite Digital Literature</h2></div>
-                                        <div className="relative w-full md:w-96"><div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"><Icon name="search" size={16} /></div><input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder={t.search} className="w-full bg-slate-50 border-2 border-transparent focus:border-blue-600/20 focus:bg-white rounded-2xl py-3.5 pl-11 pr-6 outline-none transition-all text-sm font-medium" /></div>
+                                        <div className="space-y-4 text-left"><h3 className="text-[11px] font-bold uppercase tracking-[0.4em] text-blue-600">Global Repository</h3><h2 className="text-3xl md:text-4xl font-serif text-slate-900 leading-tight">Elite Digital Literature</h2></div>
+                                        <div className="relative w-full md:w-96 group">
+                                            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-600 transition-colors"><Icon name="search" size={16} /></div>
+                                            <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder={t.search} className="w-full bg-slate-50 border-2 border-transparent focus:border-blue-600/20 focus:bg-white rounded-2xl py-3.5 pl-11 pr-6 outline-none transition-all text-sm font-medium" />
+                                        </div>
                                     </div>
                                     {filteredCategories.map(cat => (
                                         <div key={cat.id} className="mb-16 md:mb-20 last:mb-0">
-                                            <div className="flex items-center gap-4 mb-8 md:mb-10"><span className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 whitespace-nowrap">{cat.name}</span><div className="w-full h-[1px] bg-slate-100"></div></div>
+                                            <div className="flex items-center gap-4 mb-8 md:mb-10 text-left"><span className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 whitespace-nowrap">{cat.name}</span><div className="w-full h-[1px] bg-slate-100"></div></div>
                                             <div className="flex gap-6 md:gap-10 overflow-x-auto pb-8 md:pb-10 no-scrollbar snap-x">
                                                 {cat.books.map(book => (
                                                     <div key={book.id} className="flex-shrink-0 w-64 md:w-80 group snap-start">
                                                         <div className="aspect-[3/4] rounded-[2rem] md:rounded-[2.5rem] overflow-hidden mb-6 shadow-xl relative bg-slate-200 border-2 border-transparent hover:border-blue-600/50 transition-all cursor-pointer" onClick={() => handleDiscoveryClick(book)}>
                                                             <SafeImage src={book.image} alt={book.title} title={book.title} />
                                                             <div className="absolute inset-0 image-overlay opacity-80 group-hover:opacity-90 transition-opacity"></div>
-                                                            <div className="absolute bottom-6 left-6 right-6 space-y-4">
+                                                            <div className="absolute bottom-6 left-6 right-6 space-y-4 text-left">
                                                                 <div>
                                                                     <span className="text-[9px] bg-blue-600 text-white px-3 py-0.5 rounded-full font-bold uppercase tracking-widest mb-2 inline-block">{book.tag}</span>
                                                                     <h4 className="font-serif italic text-xl md:text-2xl text-white leading-tight">{book.title}</h4>
@@ -270,43 +335,43 @@
 
                             {/* DISCOVERY READER SECTION */}
                             {discoveryBook && (
-                                <section id="discovery-reader" className="bg-slate-50 py-16 md:py-24 px-4 md:px-6 border-t border-blue-100 animate-in slide-in-from-bottom-10 duration-1000">
+                                <section id="discovery-reader" className="bg-slate-50 py-16 md:py-24 px-4 md:px-6 border-t border-blue-100 animate-in slide-in-from-bottom-10 duration-1000 text-left">
                                     <div className="max-w-4xl mx-auto">
                                         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 md:mb-12 gap-6">
-                                            <div className="flex items-center gap-4">
-                                                <div className="w-12 h-12 md:w-14 md:h-14 bg-[#0F172A] rounded-xl flex items-center justify-center shrink-0 shadow-xl"><Icon name="book-open" className="text-blue-500" /></div>
-                                                <div><h3 className="text-xl md:text-3xl font-serif text-slate-900 leading-none mb-1 md:mb-2">{discoveryBook.title}</h3><p className="text-[9px] md:text-[10px] font-bold text-blue-600 uppercase tracking-widest">Institutional Module Learning</p></div>
+                                            <div className="flex items-center gap-4 text-left">
+                                                <div className="w-12 h-12 md:w-14 md:h-14 bg-[#0F172A] rounded-xl flex items-center justify-center shrink-0 shadow-xl border border-blue-500/10"><Icon name="book-open" className="text-blue-500" /></div>
+                                                <div><h3 className="text-xl md:text-3xl font-serif text-slate-900 leading-none mb-1 md:mb-2">{discoveryBook.title}</h3><p className="text-[9px] md:text-[10px] font-bold text-blue-600 uppercase tracking-widest">Protocol Identification Verified</p></div>
                                             </div>
                                             <button onClick={() => { setSelected(discoveryBook); setView('checkout'); }} className="bg-white border-2 border-blue-600 text-blue-600 px-6 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-blue-600 hover:text-white transition-all shadow-sm w-full md:w-auto">Acquire Full Access</button>
                                         </div>
 
-                                        <div className="bg-white rounded-[2rem] md:rounded-[3rem] shadow-2xl border border-blue-50 min-h-[450px] md:min-h-[550px] flex flex-col transition-all overflow-hidden">
+                                        <div className="bg-white rounded-[2rem] md:rounded-[3rem] shadow-2xl border border-blue-50 min-h-[450px] md:min-h-[550px] flex flex-col transition-all overflow-hidden relative text-left">
                                             <div className="flex-1 p-6 md:p-16 animate-fade-in" key={discoveryPage}>
                                                 {discoveryPage < 5 ? (
                                                     <div className="h-full flex flex-col">
-                                                        <span className="text-[10px] font-bold text-blue-600 uppercase tracking-[0.4em] mb-8 md:mb-12">Module 0{discoveryPage} / 05</span>
-                                                        <h4 className="text-2xl md:text-4xl font-serif text-slate-900 mb-6 md:mb-10 italic">Core Tokenization Concepts</h4>
+                                                        <span className="text-[10px] font-bold text-blue-600 uppercase tracking-[0.4em] mb-8 md:mb-12">Section 0{discoveryPage} / 05</span>
+                                                        <h4 className="text-2xl md:text-4xl font-serif text-slate-900 mb-6 md:mb-10 italic">Asset Tokenization Architecture</h4>
                                                         <div className="space-y-6 md:space-y-8 text-slate-600 text-base md:text-lg leading-relaxed font-light">
-                                                            <p>This module analyzes the convergence of legacy banking rail architectures and decentralized settlement layers. The LuxeDigital Protocol monitors metrics to verify knowledge transfer.</p>
+                                                            <p>This module analyzes the convergence of legacy banking rails and decentralized settlement layers. The LuxeDigital Protocol monitors metrics to verify interaction.</p>
                                                         </div>
                                                         <div className="mt-auto flex justify-between items-center pt-8">
                                                             <div className="flex items-center gap-3"><div className="w-20 md:w-32 h-1 bg-slate-100 rounded-full overflow-hidden"><div className="h-full bg-blue-600" style={{ width: `${(discoveryPage/5)*100}%` }}></div></div><span className="text-[9px] font-bold text-slate-400 uppercase">{Math.round((discoveryPage/5)*100)}% Verified</span></div>
-                                                            <button onClick={() => { setDiscoveryPage(p => p + 1); }} className="bg-[#0F172A] hover:bg-blue-600 text-white px-6 md:px-10 py-3 md:py-4 rounded-xl font-bold uppercase text-[9px] md:text-[10px] tracking-[0.3em] transition-all flex items-center gap-2 shadow-xl active:scale-95 touch-active">Next <Icon name="chevron-right" size={14} /></button>
+                                                            <button onClick={() => { setDiscoveryPage(p => p + 1); }} className="bg-[#0F172A] hover:bg-blue-600 text-white px-6 md:px-10 py-3 md:py-4 rounded-xl font-bold uppercase text-[9px] md:text-[10px] tracking-[0.3em] transition-all flex items-center gap-2 shadow-xl active:scale-95 touch-active">Next Module <Icon name="chevron-right" size={14} /></button>
                                                         </div>
                                                     </div>
                                                 ) : (
-                                                    <div className="h-full flex flex-col items-center justify-center py-6 text-center animate-fade-in">
+                                                    <div className="h-full flex flex-col items-center justify-center py-6 text-center animate-fade-in px-4">
                                                         {rewardState === 0 ? (
                                                             <div className="space-y-8 md:space-y-12">
                                                                 <div className="w-20 h-20 md:w-24 md:h-24 bg-green-50 rounded-full flex items-center justify-center mx-auto border-4 border-white shadow-2xl animate-bounce"><Icon name="check" size={40} className="text-green-600" /></div>
-                                                                <div className="space-y-4"><h3 className="text-3xl md:text-5xl font-serif italic text-slate-900 leading-tight px-4">Study Verified</h3><p className="text-slate-500 text-base md:text-xl font-light max-w-lg mx-auto px-4">Proof of Knowledge confirmed. A reward of **1.00 Genesis Token** is available for allocation.</p></div>
+                                                                <div className="space-y-4"><h3 className="text-3xl md:text-5xl font-serif italic text-slate-900 leading-tight">Institutional Verification</h3><p className="text-slate-500 text-base md:text-xl font-light max-w-lg mx-auto">Knowledge transfer confirmed. A reward of **1.00 Genesis Token** is available for allocation.</p></div>
                                                                 <button onClick={claimDiscoveryReward} className="bg-blue-600 hover:bg-blue-700 text-white w-full md:w-auto px-12 py-5 rounded-2xl font-bold uppercase text-xs tracking-[0.3em] shadow-2xl transition-all flex items-center justify-center gap-4 active:scale-95 touch-active"><Icon name="award" size={20} /> {t.claimReward}</button>
                                                             </div>
                                                         ) : (
                                                             <div className="space-y-8 animate-fade-in">
                                                                 <div className={`w-32 h-32 md:w-40 md:h-40 rounded-full flex items-center justify-center mx-auto transition-all duration-1000 ${rewardState === 3 ? 'bg-green-50 shadow-2xl' : 'bg-blue-50'}`}>{rewardState === 3 ? <Icon name="award" size={56} className="text-green-600 animate-in zoom-in" /> : <Icon name="refresh-ccw" size={40} className="text-blue-600 animate-spin" />}</div>
-                                                                <div className="space-y-4"><h3 className="text-2xl md:text-3xl font-serif italic text-slate-900">{rewardState < 3 ? t.rewardPending : t.rewardSuccess}</h3><p className="text-[9px] font-mono uppercase text-blue-400 tracking-[0.4em] animate-pulse-soft">{rewardState === 1 ? "Authorizing Signature..." : rewardState === 2 ? "Broadcasting to Node..." : "Allocation Immutable"}</p></div>
-                                                                {rewardState === 3 && <div className="pt-6 flex flex-col md:flex-row gap-4"><button onClick={() => setView('history')} className="px-10 py-4 bg-[#0F172A] text-white rounded-xl font-bold text-[10px] uppercase tracking-widest shadow-xl touch-active">Digital Vault</button><button onClick={() => setDiscoveryBook(null)} className="px-10 py-4 border-2 border-slate-200 rounded-xl font-bold text-[10px] uppercase tracking-widest text-slate-400 touch-active">Close</button></div>}
+                                                                <div className="space-y-4"><h3 className="text-2xl md:text-3xl font-serif italic text-slate-900">{rewardState < 3 ? t.rewardPending : t.rewardSuccess}</h3><p className="text-[9px] font-mono uppercase text-blue-400 tracking-[0.4em] animate-pulse-soft">{rewardState === 1 ? "Authorizing Signature..." : rewardState === 2 ? "Broadcasting to Node..." : "Allocation Immutable on Polygon"}</p></div>
+                                                                {rewardState === 3 && <div className="pt-6 flex flex-col md:flex-row gap-4 px-8"><button onClick={() => setView('history')} className="px-10 py-4 bg-[#0F172A] text-white rounded-xl font-bold text-[10px] uppercase tracking-widest shadow-xl touch-active">Digital Vault</button><button onClick={() => setDiscoveryBook(null)} className="px-10 py-4 border-2 border-slate-200 rounded-xl font-bold text-[10px] uppercase tracking-widest text-slate-400 touch-active">Close Reader</button></div>}
                                                             </div>
                                                         )}
                                                     </div>
@@ -320,26 +385,42 @@
                     )}
 
                     {view === 'checkout' && (
-                        <main className="pt-24 md:pt-32 pb-24 max-w-6xl mx-auto px-4 md:px-6 animate-fade-in">
+                        <main className="pt-24 md:pt-32 pb-24 max-w-6xl mx-auto px-4 md:px-6 animate-fade-in text-left">
                             <button onClick={() => setView('home')} className="flex items-center gap-2 text-[10px] font-bold text-slate-400 hover:text-blue-600 mb-8 md:mb-12 uppercase tracking-widest transition-colors"><Icon name="arrow-left" size={14}/> {t.back}</button>
                             <div className="grid lg:grid-cols-12 gap-10 md:gap-20">
                                 <div className="lg:col-span-7 space-y-10">
-                                    <div className="space-y-4"><span className="text-[10px] font-bold uppercase tracking-[0.3em] text-blue-600">Secure Acquisition</span><h2 className="text-4xl md:text-6xl font-serif text-slate-900 leading-tight">{selected === 'token' ? t.tokenTitle : selected.title}</h2></div>
+                                    <div className="space-y-4 text-left"><span className="text-[10px] font-bold uppercase tracking-[0.3em] text-blue-600">Secure Acquisition</span><h2 className="text-3xl md:text-6xl font-serif text-slate-900 leading-tight">{selected === 'token' ? t.tokenTitle : selected?.title}</h2></div>
                                     <div className="space-y-10 pt-8 md:pt-12 border-t border-slate-100 text-left">
-                                        <div className="space-y-4"><label className="text-[10px] font-bold uppercase text-slate-500 tracking-widest">Email Identity</label><input type="email" value={email} onChange={e => setEmail(e.target.value)} className="w-full bg-transparent border-b-2 border-slate-100 py-4 md:py-6 outline-none focus:border-blue-600 text-2xl md:text-3xl font-light placeholder:text-slate-200" placeholder="curator@example.com" /></div>
+                                        <div className="space-y-4 text-left"><label className="text-[10px] font-bold uppercase text-slate-500 tracking-widest">Delivery Identity (Email)</label><input type="email" value={email} onChange={e => setEmail(e.target.value)} className="w-full bg-transparent border-b-2 border-slate-100 py-4 md:py-6 outline-none focus:border-blue-600 text-2xl md:text-3xl font-light placeholder:text-slate-200" placeholder="curator@example.com" /></div>
                                         {selected === 'token' && (
-                                            <div className="grid md:grid-cols-2 gap-8 md:gap-12"><div className="space-y-4"><label className="text-[10px] font-bold uppercase text-slate-500 tracking-widest">Quantity</label><input type="number" min="1" value={qty} onChange={e => setQty(Math.max(1, parseInt(e.target.value) || 1))} className="w-full bg-transparent border-b-2 border-slate-100 py-4 outline-none focus:border-blue-600 text-3xl md:text-4xl font-mono text-blue-900" /></div><div className="space-y-4"><label className="text-[10px] font-bold uppercase text-slate-500 tracking-widest">Network</label><div className="py-4 md:py-6 border-b-2 border-slate-100 flex items-center justify-between"><span className="text-lg font-mono text-slate-300">Polygon L2</span><div className="w-3 h-3 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]"></div></div></div></div>
+                                            <div className="grid md:grid-cols-2 gap-8 md:gap-12"><div className="space-y-4 text-left"><label className="text-[10px] font-bold uppercase text-slate-500 tracking-widest">Quantity</label><input type="number" min="1" value={qty} onChange={e => setQty(Math.max(1, parseInt(e.target.value) || 1))} className="w-full bg-transparent border-b-2 border-slate-100 py-4 outline-none focus:border-blue-600 text-3xl md:text-4xl font-mono text-blue-900" /></div><div className="space-y-4 text-left"><label className="text-[10px] font-bold uppercase text-slate-500 tracking-widest">Network</label><div className="py-4 md:py-6 border-b-2 border-slate-100 flex items-center justify-between"><span className="text-lg font-mono text-slate-300">Polygon L2</span><div className="w-3 h-3 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]"></div></div></div></div>
                                         )}
-                                        <div className="space-y-6"><label className="text-[10px] font-bold uppercase text-slate-500 tracking-widest">{t.wallet}</label>
+                                        <div className="space-y-6 text-left"><label className="text-[10px] font-bold uppercase text-slate-500 tracking-widest">{t.wallet}</label>
                                             {!isConnected ? (
-                                                <div className="flex flex-col gap-4"><button onClick={() => setIsWalletModalOpen(true)} className="w-full border-2 border-blue-50 bg-white py-5 rounded-2xl flex items-center justify-center gap-4 text-xs font-bold hover:bg-blue-50 transition-all text-blue-900 shadow-sm touch-active"><Icon name="wallet" size={18} /> {t.connect}</button><input type="text" value={manualWallet} onChange={e => setManualWallet(e.target.value)} className="w-full border-2 border-slate-50 rounded-2xl px-6 py-5 outline-none focus:border-blue-600 text-xs font-mono shadow-sm bg-white" placeholder="Manual address (0x...)" /></div>
+                                                <div className="flex flex-col gap-4">
+                                                    <button onClick={() => setIsWalletModalOpen(true)} className="w-full border-2 border-blue-50 bg-white py-5 rounded-2xl flex items-center justify-center gap-4 text-xs font-bold hover:bg-blue-50 transition-all text-blue-900 shadow-sm touch-active lxd-tooltip">
+                                                        <Icon name="wallet" size={18} /> 
+                                                        <span className="font-bold">Link Institutional Wallet</span>
+                                                        <span className="tooltiptext">Secure Auth</span>
+                                                    </button>
+                                                    <input type="text" value={manualWallet} onChange={e => setManualWallet(e.target.value)} className="w-full border-2 border-slate-50 rounded-2xl px-6 py-5 outline-none focus:border-blue-600 text-xs font-mono shadow-sm bg-white" placeholder="Manual address (0x...)" />
+                                                </div>
                                             ) : (
-                                                <div className="p-6 md:p-8 bg-blue-50 rounded-3xl border border-blue-100 flex items-center justify-between shadow-inner animate-fade-in"><div className="flex items-center gap-4 flex-1 overflow-hidden text-left"><Icon name="shield-check" size={24} className="text-blue-600 shrink-0" /><div className="overflow-hidden"><p className="text-[9px] font-bold text-blue-400 uppercase mb-1">Signed Identity</p><p className="font-mono text-sm md:text-xl text-blue-900 truncate">0x71C7656EC7ab88b098defB751B7401B5f6d8976F</p></div></div><button onClick={() => setIsConnected(false)} className="text-[10px] font-bold uppercase text-blue-400 hover:text-red-500 ml-4 shrink-0 transition-colors">Change</button></div>
+                                                <div className="p-6 md:p-8 bg-blue-50 rounded-3xl border border-blue-100 flex items-center justify-between shadow-inner animate-fade-in">
+                                                    <div className="flex items-center gap-4 flex-1 overflow-hidden">
+                                                        <div className="lxd-tooltip shrink-0">
+                                                            <Icon name="shield-check" size={24} className="text-blue-600" />
+                                                            <span className="tooltiptext">Authenticated</span>
+                                                        </div>
+                                                        <div className="overflow-hidden text-left"><p className="text-[9px] font-bold text-blue-400 uppercase mb-1">Signed Identity</p><p className="font-mono text-sm md:text-xl text-blue-900 truncate">0x71C7656EC7ab88b098defB751B7401B5f6d8976F</p></div>
+                                                    </div>
+                                                    <button onClick={() => setIsConnected(false)} className="text-[10px] font-bold uppercase text-blue-400 hover:text-red-500 ml-4 shrink-0 transition-colors">Disconnect</button>
+                                                </div>
                                             )}
                                         </div>
                                     </div>
                                 </div>
-                                <div className="lg:col-span-5"><div className="sticky top-28 bg-white p-8 md:p-12 rounded-[2.5rem] md:rounded-[3.5rem] shadow-xl border border-blue-50 space-y-8 md:space-y-10 text-left"><h3 className="text-2xl font-serif italic border-b pb-6 md:pb-8">Order Valuation</h3><div className="space-y-4"><div className="flex justify-between text-sm"><span className="text-slate-400">Inventory</span><span className="font-mono font-bold">€{total.toFixed(2)}</span></div><div className="flex justify-between text-sm"><span className="text-slate-400">Processing & Gas</span><span className="text-green-600 font-bold uppercase text-[10px]">Sponsored</span></div><div className="pt-6 md:pt-8 border-t border-blue-50 flex justify-between items-end"><span className="text-xl md:text-2xl font-serif italic text-slate-900">Total</span><span className="text-4xl md:text-5xl font-light text-blue-600 tracking-tighter">€{total.toFixed(2)}</span></div></div><div className="space-y-8"><label className="flex gap-4 cursor-pointer group"><input type="checkbox" checked={accepted} onChange={e => setAccepted(e.target.checked)} className="mt-1 w-6 h-6 border-slate-200 rounded-lg text-blue-600 focus:ring-0 transition-all" /><span className="text-[11px] text-slate-400 leading-relaxed transition-colors group-hover:text-slate-500">{t.terms}</span></label><button onClick={() => setView('payment')} disabled={!accepted || !email || (!isConnected && !manualWallet)} className="w-full bg-[#0F172A] hover:bg-blue-600 text-white py-5 rounded-2xl font-bold uppercase tracking-[0.2em] text-[10px] md:text-xs disabled:opacity-20 shadow-2xl transition-all touch-active active:scale-95">Proceed to Payment Gateway</button></div></div></div>
+                                <div className="lg:col-span-5"><div className="sticky top-28 bg-white p-8 md:p-12 rounded-[2.5rem] md:rounded-[3.5rem] shadow-xl border border-blue-50 space-y-8 md:space-y-10 text-left"><h3 className="text-2xl font-serif italic border-b pb-6 md:pb-8">Valuation</h3><div className="space-y-4 text-left"><div className="flex justify-between text-sm"><span className="text-slate-400 font-medium">Inventory Value</span><span className="font-mono font-bold">€{total.toFixed(2)}</span></div><div className="flex justify-between text-sm"><span className="text-slate-400 font-medium">Network Handshake</span><span className="text-green-600 font-bold uppercase text-[10px]">Sponsored</span></div><div className="pt-6 md:pt-8 border-t border-blue-50 flex justify-between items-end text-left"><span className="text-xl md:text-2xl font-serif italic text-slate-900 leading-none">Total Due</span><span className="text-4xl md:text-5xl font-light text-blue-600 tracking-tighter leading-none">€{total.toFixed(2)}</span></div></div><div className="space-y-8 text-left"><label className="flex gap-4 cursor-pointer group"><input type="checkbox" checked={accepted} onChange={e => setAccepted(e.target.checked)} className="mt-1 w-6 h-6 border-slate-200 rounded-lg text-blue-600 focus:ring-0 transition-all cursor-pointer" /><span className="text-[11px] text-slate-400 leading-relaxed transition-colors group-hover:text-slate-500">{t.terms}</span></label><button onClick={() => setView('payment')} disabled={!accepted || !email || (!isConnected && !manualWallet)} className="w-full bg-[#0F172A] hover:bg-blue-600 text-white py-5 rounded-2xl font-bold uppercase tracking-[0.2em] text-[10px] md:text-xs disabled:opacity-20 shadow-2xl transition-all touch-active active:scale-95">Proceed to Payment</button></div></div></div>
                             </div>
                         </main>
                     )}
@@ -347,28 +428,41 @@
                     {view === 'payment' && (
                         <main className="pt-28 md:pt-32 pb-24 max-w-xl mx-auto px-4 md:px-6 animate-fade-in text-left">
                             <div className="bg-white rounded-[2.5rem] md:rounded-[3rem] shadow-2xl overflow-hidden border border-slate-100">
-                                <header className="bg-slate-50 p-8 md:p-10 border-b border-slate-100">
-                                    <div className="flex justify-between items-center mb-10"><span className="text-[10px] font-bold uppercase tracking-[0.4em] text-blue-600">Secure Acquisition Portal</span><Icon name="lock" size={14} className="text-slate-400" /></div>
-                                    <div className="flex bg-slate-200/50 p-1 rounded-xl mb-10 overflow-x-auto no-scrollbar">{['stripe', 'paypal', 'bank'].map(m => (<button key={m} onClick={() => setPaymentType(m)} className={`flex-1 py-3 px-2 rounded-lg text-[9px] font-bold uppercase tracking-widest transition-all whitespace-nowrap ${paymentType === m ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>{m === 'stripe' ? 'Stripe / Card' : m === 'paypal' ? 'PayPal' : 'SEPA'}</button>))}</div>
-                                    <div className="flex justify-between items-end"><div><p className="text-[10px] font-bold uppercase text-slate-400 mb-1">Total Settlement</p><p className="text-3xl md:text-4xl font-light text-[#0F172A] tracking-tighter">€{total.toFixed(2)}</p></div><div className="text-right shrink-0"><p className="text-[9px] font-bold uppercase text-slate-400 mb-1">Merchant</p><p className="text-[10px] md:text-[11px] font-bold text-blue-900">LuxeDigital Protocol</p></div></div>
+                                <header className="bg-slate-50 p-8 md:p-10 border-b border-slate-100 text-left">
+                                    <div className="flex justify-between items-center mb-10"><span className="text-[10px] font-bold uppercase tracking-[0.4em] text-blue-600 text-left">Secure Financial Portal</span><div className="lxd-tooltip"><Icon name="lock" size={14} className="text-slate-400" /><span className="tooltiptext">Verified Link</span></div></div>
+                                    <div className="flex bg-slate-200/50 p-1 rounded-xl mb-10 overflow-x-auto no-scrollbar">
+                                        {['stripe', 'apple', 'google', 'paypal', 'bank'].map(m => (
+                                            <button key={m} onClick={() => setPaymentType(m)} className={`flex-1 py-3 px-3 rounded-lg text-[9px] font-bold uppercase tracking-widest transition-all whitespace-nowrap ${paymentType === m ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>
+                                                {m === 'stripe' ? 'Stripe' : m === 'apple' ? 'Apple' : m === 'google' ? 'Google' : m === 'paypal' ? 'PayPal' : 'SEPA'}
+                                            </button>
+                                        ))}
+                                    </div>
+                                    <div className="flex justify-between items-end text-left"><div><p className="text-[10px] font-bold uppercase text-slate-400 mb-1">Total Settlement</p><p className="text-3xl md:text-4xl font-light text-[#0F172A] tracking-tighter">€{total.toFixed(2)}</p></div><div className="text-right shrink-0"><p className="text-[9px] font-bold uppercase text-slate-400 mb-1 text-right">Merchant</p><p className="text-[10px] md:text-[11px] font-bold text-blue-900">LuxeDigital Protocol</p></div></div>
                                 </header>
                                 <div className="p-8 md:p-10 space-y-10">
-                                    {paymentType === 'stripe' && (<div className="space-y-6 animate-fade-in text-left"><div className="space-y-4"><label className="text-[10px] font-bold uppercase text-slate-400 tracking-widest">Card Credentials</label><div className="relative"><div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"><Icon name="credit-card" size={18} /></div><input type="text" defaultValue="4242 4242 4242 4242" className="w-full bg-slate-50 border-2 border-slate-100 focus:border-blue-600/20 rounded-xl py-4 pl-12 pr-4 outline-none transition-all font-mono text-sm" /></div><div className="grid grid-cols-2 gap-4"><input type="text" defaultValue="12 / 28" className="w-full bg-slate-50 border-2 border-slate-100 focus:border-blue-600/20 rounded-xl py-4 px-4 outline-none transition-all font-mono text-sm" /><input type="text" defaultValue="999" className="w-full bg-slate-50 border-2 border-slate-100 focus:border-blue-600/20 rounded-xl py-4 px-4 outline-none transition-all font-mono text-sm" /></div></div><div className="flex items-center gap-3 text-slate-400 opacity-60 grayscale"><div className="h-6 w-10 bg-slate-200 rounded"></div><div className="h-6 w-10 bg-slate-200 rounded"></div><div className="h-6 w-10 bg-slate-200 rounded"></div></div></div>)}
-                                    {paymentType === 'paypal' && (<div className="space-y-6 animate-fade-in py-6 text-center"><button onClick={handleFinalPurchase} className="w-full bg-[#FFC439] hover:bg-[#F2BA36] py-5 rounded-xl flex items-center justify-center gap-3 font-bold transition-all touch-active shadow-lg shadow-[#FFC439]/20 text-blue-900"><Icon name="send" size={20} /> PayPal Checkout</button><p className="text-[10px] text-slate-400 font-medium">Log in to your PayPal account on the next screen to authorize.</p></div>)}
-                                    {paymentType === 'bank' && (<div className="space-y-6 animate-fade-in text-left"><div className="space-y-4"><label className="text-[10px] font-bold uppercase text-slate-400 tracking-widest">IBAN Identification (SEPA)</label><input type="text" defaultValue="FR76 1234 5678 9012 3456 7890 123" className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl py-4 px-4 font-mono text-xs uppercase" /></div><div className="bg-blue-50 border border-blue-100 p-4 rounded-xl"><p className="text-[10px] text-blue-600 leading-relaxed font-medium italic">Instant Transfer enabled. Settlement occurs after inter-bank confirmation.</p></div></div>)}
-                                    {paymentType !== 'paypal' && (<div className="space-y-4"><button onClick={handleFinalPurchase} className="w-full bg-[#0F172A] hover:bg-blue-600 text-white py-5 rounded-2xl font-bold uppercase text-xs tracking-[0.2em] transition-all touch-active flex items-center justify-center gap-3 shadow-2xl active:scale-95">Confirm & Pay</button><button onClick={() => setView('checkout')} className="w-full text-[10px] font-bold uppercase text-slate-400 hover:text-red-500 tracking-[0.3em] transition-colors">Abondon Acquisition</button></div>)}
+                                    {paymentType === 'stripe' && (<div className="space-y-6 animate-fade-in text-left"><div className="space-y-4 text-left"><label className="text-[10px] font-bold uppercase text-slate-400 tracking-widest">Card Credentials</label><div className="relative"><div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"><Icon name="credit-card" size={18} /></div><input type="text" defaultValue="4242 4242 4242 4242" className="w-full bg-slate-50 border-2 border-slate-100 focus:border-blue-600/20 rounded-xl py-4 pl-12 pr-4 outline-none transition-all font-mono text-sm" /></div><div className="grid grid-cols-2 gap-4"><input type="text" defaultValue="12 / 28" className="w-full bg-slate-50 border-2 border-slate-100 focus:border-blue-600/20 rounded-xl py-4 px-4 outline-none transition-all font-mono text-sm" /><input type="text" defaultValue="999" className="w-full bg-slate-50 border-2 border-slate-100 focus:border-blue-600/20 rounded-xl py-4 px-4 outline-none transition-all font-mono text-sm" /></div></div><div className="flex justify-center items-center gap-4 opacity-40 grayscale"><div className="h-6 w-10 bg-slate-200 rounded"></div><div className="h-6 w-10 bg-slate-200 rounded"></div><div className="h-6 w-10 bg-slate-200 rounded"></div></div></div>)}
+                                    
+                                    {paymentType === 'apple' && (<div className="space-y-6 animate-fade-in text-center py-4"><button onClick={handleFinalPurchase} className="w-full bg-black text-white py-5 rounded-2xl flex items-center justify-center gap-3 font-bold transition-all touch-active shadow-xl active:scale-95"><Icon name="apple" size={20} /> Pay with Apple Pay</button><p className="text-[10px] text-slate-400 font-medium">Verify via Biometric Authentication.</p></div>)}
+                                    
+                                    {paymentType === 'google' && (<div className="space-y-6 animate-fade-in text-center py-4"><button onClick={handleFinalPurchase} className="w-full bg-[#4285F4] text-white py-5 rounded-2xl flex items-center justify-center gap-3 font-bold transition-all touch-active shadow-xl active:scale-95"><Icon name="smartphone" size={20} /> Pay with Google Pay</button><p className="text-[10px] text-slate-400 font-medium">Authenticate via Secure Account Link.</p></div>)}
+                                    
+                                    {paymentType === 'paypal' && (<div className="space-y-6 animate-fade-in py-6 text-center"><button onClick={handleFinalPurchase} className="w-full bg-[#FFC439] hover:bg-[#F2BA36] py-5 rounded-2xl flex items-center justify-center gap-3 font-bold transition-all touch-active shadow-lg shadow-[#FFC439]/20 text-blue-900 active:scale-95"><Icon name="send" size={20} /> PayPal Checkout</button><p className="text-[10px] text-slate-400 font-medium">Login to authorize transaction.</p></div>)}
+                                    
+                                    {paymentType === 'bank' && (<div className="space-y-6 animate-fade-in text-left text-left"><div className="space-y-4"><label className="text-[10px] font-bold uppercase text-slate-400 tracking-widest">IBAN Identification (SEPA)</label><input type="text" defaultValue="FR76 1234 5678 9012 3456 7890 123" className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl py-4 px-4 font-mono text-xs uppercase" /></div><div className="bg-blue-50 border border-blue-100 p-4 rounded-xl"><p className="text-[10px] text-blue-600 leading-relaxed font-medium italic">Instant inter-bank transfer enabled via Open Banking.</p></div></div>)}
+                                    
+                                    {(paymentType === 'stripe' || paymentType === 'bank') && (<div className="space-y-4"><button onClick={handleFinalPurchase} className="w-full bg-[#0F172A] hover:bg-blue-600 text-white py-5 rounded-2xl font-bold uppercase text-xs tracking-[0.2em] transition-all touch-active flex items-center justify-center gap-3 shadow-2xl active:scale-95">Complete Acquisition</button><button onClick={() => setView('checkout')} className="w-full text-[10px] font-bold uppercase text-slate-400 hover:text-red-500 tracking-[0.3em] transition-colors">Abondon</button></div>)}
                                 </div>
                             </div>
-                            <p className="mt-8 text-center text-[10px] font-medium text-slate-400 uppercase tracking-widest opacity-60">PCI DSS Level 1 Certified Infrastructure</p>
+                            <p className="mt-8 text-center text-[10px] font-medium text-slate-400 uppercase tracking-widest opacity-60">PCI DSS Level 1 Infrastructure — Encrypted Flow</p>
                         </main>
                     )}
 
                     {view === 'status' && (
-                        <main className="pt-40 md:pt-48 pb-24 px-4 animate-fade-in">
-                            <div className="max-w-2xl mx-auto text-center">
+                        <main className="pt-40 md:pt-48 pb-24 px-4 animate-fade-in text-center">
+                            <div className="max-w-2xl mx-auto">
                                 {step < 3 ? (
-                                    <div className="space-y-12"><div className="flex justify-center relative"><div className="w-36 h-36 md:w-48 md:h-48 rounded-full flex items-center justify-center bg-blue-50 border border-blue-100 shadow-inner"><Icon name="refresh-ccw" size={40} className="text-blue-600 animate-spin" /></div></div><div className="space-y-4"><h2 className="text-4xl md:text-5xl font-serif italic text-slate-900">{t.status[step]}</h2><p className="text-[10px] font-mono uppercase text-blue-400 tracking-[0.3em] animate-pulse-soft px-4">Establishing Secure Network Link...</p></div><div className="grid grid-cols-4 gap-3 max-w-sm mx-auto">{[0, 1, 2, 3].map(i => <div key={i} className={`h-1.5 rounded-full transition-all duration-700 ${i <= step ? 'bg-blue-600 shadow-lg' : 'bg-slate-100'}`}></div>)}</div></div>
-                                ) : (<DigitalReceipt data={{ id: currentTransactionId, date: new Date().toLocaleString(), email: email, item: selected === 'token' ? 'Genesis Utility Token' : selected.title, qty: selected === 'token' ? qty : 1, amount: total }} onBack={() => { setView('home'); setStep(0); }} />)}
+                                    <div className="space-y-12"><div className="flex justify-center relative"><div className="w-36 h-36 md:w-48 md:h-48 rounded-full flex items-center justify-center bg-blue-50 border border-blue-100 shadow-inner"><Icon name="refresh-ccw" size={40} className="text-blue-600 animate-spin" /></div></div><div className="space-y-4"><h2 className="text-4xl md:text-5xl font-serif italic text-slate-900">{(t.status && t.status[step]) || 'Processing...'}</h2><p className="text-[10px] font-mono uppercase text-blue-400 tracking-[0.3em] animate-pulse-soft px-4">Establishing Secure Network Link...</p></div><div className="grid grid-cols-4 gap-3 max-w-sm mx-auto">{[0, 1, 2, 3].map(i => <div key={i} className={`h-1.5 rounded-full transition-all duration-700 ${i <= step ? 'bg-blue-600 shadow-lg' : 'bg-slate-100'}`}></div>)}</div></div>
+                                ) : (<DigitalReceipt data={{ id: currentTransactionId, date: new Date().toLocaleString(), email: email, item: selected === 'token' ? 'Genesis Utility Token' : (selected?.title || 'Unknown Asset'), qty: selected === 'token' ? qty : 1, amount: total }} onBack={() => { setView('home'); setStep(0); setSelected(null); setDiscoveryBook(null); }} />)}
                             </div>
                         </main>
                     )}
@@ -377,17 +471,17 @@
                         <main className="pt-32 pb-24 max-w-4xl mx-auto px-4 md:px-6 animate-fade-in text-left">
                             {historyItemDetail ? <DigitalReceipt data={historyItemDetail} onBack={() => setHistoryItemDetail(null)} /> : (
                                 <>
-                                    <header className="flex flex-col sm:flex-row justify-between items-end mb-12 border-b pb-8 gap-4"><div className="space-y-2 text-left w-full"><h3 className="text-[11px] font-bold uppercase tracking-[0.4em] text-blue-600">Institutional Portfolio</h3><h2 className="text-3xl md:text-4xl font-serif text-slate-900">Digital Vault History</h2></div><div className="flex items-center gap-6"><div className="text-right shrink-0"><p className="text-[9px] font-bold uppercase text-slate-400">Earned Assets</p><p className="font-mono font-bold text-blue-600 text-xl">{earnedBalance.toFixed(2)} GEN</p></div><button onClick={() => setView('home')} className="text-[10px] font-bold uppercase tracking-widest text-slate-400 hover:text-blue-600 transition-colors shrink-0">{t.back}</button></div></header>
-                                    <div className="space-y-4 md:space-y-6">
+                                    <header className="flex flex-col sm:flex-row justify-between items-end mb-12 border-b pb-8 gap-4 text-left"><div className="space-y-2 text-left w-full"><h3 className="text-[11px] font-bold uppercase tracking-[0.4em] text-blue-600">Secure Records</h3><h2 className="text-3xl md:text-4xl font-serif text-slate-900">Portfolio History</h2></div><div className="flex items-center gap-6"><div className="text-right shrink-0"><p className="text-[9px] font-bold uppercase text-slate-400">Total GEN Assets</p><p className="font-mono font-bold text-blue-600 text-xl">{earnedBalance.toFixed(2)} GEN</p></div><button onClick={() => { setView('home'); setHistoryItemDetail(null); }} className="text-[10px] font-bold uppercase tracking-widest text-slate-400 hover:text-blue-600 transition-colors shrink-0">Home</button></div></header>
+                                    <div className="space-y-4">
                                         {purchaseHistory.length > 0 ? purchaseHistory.map(record => (
-                                            <div key={record.id} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col md:flex-row justify-between gap-6 group hover:shadow-md transition-all">
-                                                <div className="flex gap-6 items-start text-left flex-1"><div className="w-10 h-10 md:w-12 md:h-12 bg-blue-50 rounded-xl flex items-center justify-center border border-blue-100 shrink-0"><Icon name={record.isReward ? 'award' : (record.type === 'ERC20' ? 'cpu' : 'book')} size={24} className="text-blue-600" /></div><div className="space-y-1"><p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{record.date}</p><h4 className="font-serif italic text-lg md:text-xl leading-tight text-slate-900">{record.item}</h4><p className="text-[10px] text-blue-500 font-mono">{record.id}</p></div></div>
+                                            <div key={record.id} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col md:flex-row justify-between gap-6 group hover:shadow-md transition-all text-left cursor-pointer" onClick={() => setHistoryItemDetail(record)}>
+                                                <div className="flex gap-6 items-start flex-1 text-left"><div className="w-10 h-10 md:w-12 md:h-12 bg-blue-50 rounded-xl flex items-center justify-center shrink-0 text-blue-600"><Icon name={record.isReward ? 'award' : (record.type === 'ERC20' ? 'cpu' : 'book')} size={24} /></div><div className="space-y-1"><p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest text-left">{record.date}</p><h4 className="font-serif italic text-lg md:text-xl leading-tight text-slate-900 text-left">{record.item}</h4><p className="text-[10px] text-blue-500 font-mono text-left">{record.id}</p></div></div>
                                                 <div className="flex flex-row md:flex-col justify-between items-end md:text-right gap-3 border-t md:border-t-0 pt-4 md:pt-0">
-                                                    <div className="text-left md:text-right"><p className="text-[9px] font-bold text-slate-400 uppercase">Valuation</p><p className="font-mono font-bold text-blue-900 text-lg">{record.amount === 0 ? `+${record.qty.toFixed(2)} GEN` : `€${record.amount.toFixed(2)}`}</p></div>
-                                                    <button onClick={() => setHistoryItemDetail(record)} className="text-[9px] font-bold uppercase text-blue-600 flex items-center gap-1.5 active:scale-95 touch-active">View Proof <Icon name="chevron-right" size={12} /></button>
+                                                    <div className="text-left md:text-right"><p className="text-[9px] font-bold text-slate-400 uppercase text-right">Valuation</p><p className="font-mono font-bold text-blue-900 text-lg">{record.amount === 0 ? `+${(record.qty || 0).toFixed(2)} GEN` : `€${(record.amount || 0).toFixed(2)}`}</p></div>
+                                                    <button className="text-[9px] font-bold uppercase text-blue-600 flex items-center gap-1.5 active:scale-95 touch-active">Certificate <Icon name="chevron-right" size={12} /></button>
                                                 </div>
                                             </div>
-                                        )) : <div className="text-center py-24 bg-white rounded-3xl border-2 border-dashed border-slate-100 text-slate-400 font-medium text-sm">{t.noHistory}</div>}
+                                        )) : <div className="text-center py-24 bg-white rounded-3xl border-2 border-dashed border-slate-100 text-slate-400 font-medium text-sm">No institutional records found.</div>}
                                     </div>
                                 </>
                             )}
@@ -399,10 +493,10 @@
                         <div className="fixed inset-0 z-[100] bg-[#0F172A]/90 backdrop-blur-xl flex items-end sm:items-center justify-center p-0 sm:p-6 animate-fade-in no-print text-left">
                             <div className="bg-white w-full max-w-lg rounded-t-[2.5rem] sm:rounded-[3.5rem] p-8 md:p-16 space-y-12 shadow-2xl relative border border-blue-50">
                                 <button onClick={() => setIsWalletModalOpen(false)} className="absolute top-10 right-10 text-slate-300 hover:text-black transition-colors"><Icon name="x" size={32} /></button>
-                                <div className="space-y-4"><h3 className="text-3xl md:text-4xl font-serif italic text-slate-900">Establish Link</h3><p className="text-slate-500 font-light text-sm">Select your institutional digital identity interface.</p></div>
+                                <div className="space-y-4"><h3 className="text-3xl md:text-4xl font-serif italic text-slate-900 text-left leading-tight">Link Institutional Identity</h3><p className="text-slate-500 font-light text-sm">Select your digital identity interface.</p></div>
                                 <div className="space-y-4">
                                     {['MetaMask', 'WalletConnect', 'Coinbase'].map(name => (
-                                        <button key={name} disabled={isConnecting} onClick={() => handleConnect(name)} className="w-full flex items-center justify-between p-6 md:p-8 border-2 border-slate-50 rounded-[1.5rem] md:rounded-[2rem] hover:bg-blue-50 transition-all text-left disabled:opacity-50 touch-active group"><div className="flex items-center gap-4"><div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center group-hover:bg-white transition-colors"><Icon name="link" size={18} /></div><span className="font-bold text-[10px] md:text-xs uppercase tracking-widest text-slate-700">{name}</span></div><Icon name="chevron-right" size={18} className="text-slate-200" /></button>
+                                        <button key={name} disabled={isConnecting} onClick={() => handleConnect(name)} className="w-full flex items-center justify-between p-6 md:p-8 border-2 border-slate-50 rounded-[1.5rem] md:rounded-[2rem] hover:bg-blue-50 transition-all text-left disabled:opacity-50 touch-active group"><div className="flex items-center gap-4 text-left"><div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-colors"><Icon name="link" size={18} /></div><span className="font-bold text-[10px] md:text-xs uppercase tracking-widest text-slate-700">{name}</span></div><Icon name="chevron-right" size={18} className="text-slate-200" /></button>
                                     ))}
                                 </div>
                                 {isConnecting && <div className="absolute inset-0 bg-white/95 backdrop-blur-sm flex flex-col items-center justify-center gap-6 animate-fade-in"><Icon name="refresh-ccw" size={40} className="text-blue-600 animate-spin" /><p className="text-[10px] font-bold uppercase tracking-[0.4em] text-blue-900">Waiting for Signature...</p></div>}
@@ -413,24 +507,24 @@
                     {/* FOOTER */}
                     <footer className="bg-[#0F172A] text-white py-16 md:py-32 px-4 md:px-6 mt-20 relative overflow-hidden no-print text-left">
                         <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-blue-500/20 to-transparent"></div>
-                        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-16 md:gap-20 relative z-10">
+                        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-16 md:gap-20 relative z-10 text-left">
                             <div className="md:col-span-2 space-y-8 text-center md:text-left">
                                 <div className="flex items-center justify-center md:justify-start gap-3"><div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center shadow-lg"><Icon name="layers" size={16}/></div><span className="font-serif italic text-2xl text-blue-50 leading-none">LuxeDigital</span></div>
                                 <p className="text-blue-200/30 text-sm font-light max-w-md mx-auto md:mx-0 leading-relaxed">Institutional digital asset issuance on the Polygon Network. Engineered for absolute stability and immutable ledger delivery.</p>
-                                <div className="space-y-1 pt-4 text-center md:text-left"><p className="text-[10px] font-bold uppercase tracking-[0.4em] text-blue-500/80">Developed by Amit N</p><p className="text-[9px] font-mono text-blue-900 uppercase">Release v4.9.5 — 2026</p></div>
+                                <div className="space-y-1 pt-4 text-center md:text-left"><p className="text-[10px] font-bold uppercase tracking-[0.4em] text-blue-500/80">Developed by Amit N</p><p className="text-[9px] font-mono text-blue-900 uppercase">Release v4.9.9 — 2026</p></div>
                             </div>
                             <div className="space-y-6 text-slate-400 hidden md:block">
                                 <h4 className="text-[11px] font-bold uppercase tracking-[0.4em] text-blue-400">Legal Standard</h4>
-                                <ul className="space-y-3 text-[10px] font-bold uppercase tracking-widest text-blue-100/30"><li className="hover:text-blue-400 cursor-pointer">Issuance Terms</li><li className="hover:text-blue-400 cursor-pointer">Sovereignty Audit</li><li className="hover:text-blue-400 cursor-pointer text-blue-600">Whitepaper v4.9</li></ul>
+                                <ul className="space-y-3 text-[10px] font-bold uppercase tracking-widest text-blue-100/30 text-left"><li className="hover:text-blue-400 cursor-pointer">Issuance Terms</li><li className="hover:text-blue-400 cursor-pointer">Sovereignty Audit</li><li className="hover:text-blue-400 cursor-pointer text-blue-600">Whitepaper v4.9</li></ul>
                             </div>
-                            <div className="space-y-6 text-slate-400 text-center md:text-left">
+                            <div className="space-y-6 text-slate-400 text-left">
                                 <h4 className="text-[11px] font-bold uppercase tracking-[0.4em] text-blue-400">System Status</h4>
-                                <div className="flex items-center justify-center md:justify-start gap-3 text-green-400 bg-green-400/5 px-4 py-2 rounded-lg border border-green-400/10 w-fit mx-auto md:mx-0"><div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div> <span className="text-[10px] uppercase font-bold tracking-widest tracking-[0.2em]">Node Online</span></div>
+                                <div className="flex items-center justify-start gap-3 text-green-400 bg-green-400/5 px-4 py-2 rounded-lg border border-green-400/10 w-fit"><div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div> <span className="text-[10px] uppercase font-bold tracking-widest tracking-[0.2em]">Node Online</span></div>
                             </div>
                         </div>
                         <div className="max-w-7xl mx-auto pt-24 border-t border-white/5 mt-10 flex flex-col md:flex-row justify-between items-center gap-6 text-[10px] md:text-[11px] font-bold uppercase tracking-[0.6em] text-blue-100/10">
                             <span>&copy; 2026 LuxeDigital Protocol — Amit N</span>
-                            <div className="flex gap-4 md:gap-8"><span>Paris</span><span>London</span><span>Frankfurt</span></div>
+                            <div className="flex gap-4 md:gap-8 justify-center"><span>Paris</span><span>London</span><span>Frankfurt</span></div>
                         </div>
                     </footer>
                 </div>
